@@ -437,37 +437,37 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		this->grid = !this->grid;
 		break;
 	case('Q'):
-		this->branchAngles[0] -= val;
+		this->branchAngles[0] += val;
 		break;
 	case('W'):
 		this->branchAngles[1] += val;
 		break;
 	case('E'):
-		this->branchAngles[2] -= val;
+		this->branchAngles[2] += val;
 		break;
 	case('R'):
 		this->branchAngles[3] += val;
 		break;
 	case('T'):
-		this->branchAngles[4] -= val;
+		this->branchAngles[4] += val;
 		break;
 	case('Z'):
 		this->branchAngles[5] += val;
 		break;
 	case('U'):
-		this->branchAngles[6] -= val;
+		this->branchAngles[6] += val;
 		break;
 	case('I'):
 		this->branchAngles[7] += val;
 		break;
 	case('O'):
-		this->branchAngles[8] -= val;
+		this->branchAngles[8] += val;
 		break;
 	case('P'):
 		this->branchAngles[9] += val;
 		break;
 	case('A'):
-		this->branchAngles[10] -= val;
+		this->branchAngles[10] += val;
 		break;
 	default:
 		break;
