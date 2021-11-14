@@ -241,9 +241,9 @@ void CIND16995View::RotationAround(CDC* pDC, DPOINT center, double angle, bool r
 {
 	if (rightMultiply)
 	{
-		Translate(pDC, center.x, center.y, true);
-		Rotate(pDC, angle, true);
 		Translate(pDC, -center.x, -center.y, true);
+		Rotate(pDC, angle, true);
+		Translate(pDC, center.x, center.y, true);
 	}
 	else
 	{
@@ -266,119 +266,83 @@ void CIND16995View::Reflect(CDC* pDC, float dX, float dY, bool rightMultiply)
 
 void CIND16995View::DrawCactus(CDC* pDC)
 {
-	XFORM* tempWT = new XFORM[11];
+	int oldGM = pDC->SetGraphicsMode(GM_ADVANCED);
+	XFORM oldWT{};
+	pDC->GetWorldTransform(&oldWT);
 
-	pDC->GetWorldTransform(&(tempWT[0]));
-	{
-		RotationAround(pDC, this->joints[0], this->branchAngles[0], false);
-		DrawBranch(pDC, { 2.2 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part_light.emf", 0);
+	RotationAround(pDC, joints[0], branchAngles[0], false);
+	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part_light.emf", 0);
 
-		pDC->GetWorldTransform(&(tempWT[1]));
-		{
-			RotationAround(pDC, this->joints[1], this->branchAngles[1], false);
-			DrawBranch(pDC, { 0.8 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 1);
+	RotationAround(pDC, joints[1], branchAngles[1], false);
+	DrawBranch(pDC, { 0.8 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 1);
 
-			pDC->GetWorldTransform(&(tempWT[2]));
-			{
-				RotationAround(pDC, this->joints[2], this->branchAngles[2], false);
-				DrawBranch(pDC, { 2.2 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 2);
+	RotationAround(pDC, joints[2], branchAngles[2], false);
+	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 2);
 
-				pDC->GetWorldTransform(&(tempWT[3]));
-				{
-					RotationAround(pDC, this->joints[3], this->branchAngles[3], false);
-					DrawBranch(pDC, { 1.5 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 3);
-				}
-				pDC->SetWorldTransform(&(tempWT[3]));
+	RotationAround(pDC, joints[3], branchAngles[3], false);
+	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 3);
+	
+	RotationAround(pDC, joints[3], branchAngles[4] - branchAngles[3], false);
+	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 3);
+				
+	RotationAround(pDC, joints[3], -branchAngles[4], false);
+	DrawJoint(pDC, 3);
 
-				pDC->GetWorldTransform(&(tempWT[4]));
-				{
-					RotationAround(pDC, this->joints[3], this->branchAngles[4], false);
-					DrawBranch(pDC, { 1.5 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 3);
-				}
-				pDC->SetWorldTransform(&(tempWT[4]));
+	RotationAround(pDC, joints[2], -branchAngles[2], false);
+	DrawJoint(pDC, 2);
+	
+	RotationAround(pDC, joints[1], branchAngles[5] - branchAngles[1], false);
+	DrawBranch(pDC, { 0.8 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 1);
 
-				DrawJoint(pDC, 3);
-			}
-			pDC->SetWorldTransform(&(tempWT[2]));
-			DrawJoint(pDC, 2);
-		}
-		pDC->SetWorldTransform(&(tempWT[1]));
+	RotationAround(pDC, joints[4], branchAngles[6], false);
+	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part_light.emf", 4);
+			
+	RotationAround(pDC, joints[4], -branchAngles[6], false);
+	DrawJoint(pDC, 4);
+		
+	RotationAround(pDC, joints[1], branchAngles[7] - branchAngles[5], false);
+	DrawBranch(pDC, { 0.8 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 1);
 
-		pDC->GetWorldTransform(&(tempWT[5]));
-		{
-			RotationAround(pDC, this->joints[1], this->branchAngles[5], false);
-			DrawBranch(pDC, { 0.8 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 1);
+	RotationAround(pDC, joints[5], branchAngles[8], false);
+	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 5);
+		
+	RotationAround(pDC, joints[5], branchAngles[9] - branchAngles[8], false);
+	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 5);
 
-			pDC->GetWorldTransform(&(tempWT[6]));
-			{
-				RotationAround(pDC, this->joints[4], this->branchAngles[6], false);
-				DrawBranch(pDC, { 2.2 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part_light.emf", 4);
-			}
-			pDC->SetWorldTransform(&(tempWT[6]));
+	RotationAround(pDC, joints[6], branchAngles[10], false);
+	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 6);
+		
+	RotationAround(pDC, joints[6], -branchAngles[10], false);
+	DrawJoint(pDC, 6);
+		
+	RotationAround(pDC, joints[5], -branchAngles[9], false);
+	DrawJoint(pDC, 5);
+	
+	RotationAround(pDC, joints[1], -branchAngles[7], false);
+	DrawJoint(pDC, 1);
 
-			DrawJoint(pDC, 4);
-		}
-		pDC->SetWorldTransform(&(tempWT[5]));
-
-		pDC->GetWorldTransform(&(tempWT[7]));
-		{
-			RotationAround(pDC, this->joints[1], this->branchAngles[7], false);
-			DrawBranch(pDC, { 0.8 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 1);
-
-			pDC->GetWorldTransform(&(tempWT[8]));
-			{
-				RotationAround(pDC, this->joints[5], this->branchAngles[8], false);
-				DrawBranch(pDC, { 1.5 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 5);
-			}
-			pDC->SetWorldTransform(&(tempWT[8]));
-
-			pDC->GetWorldTransform(&(tempWT[9]));
-			{
-				RotationAround(pDC, this->joints[5], this->branchAngles[9], false);
-				DrawBranch(pDC, { 1.5 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 5);
-
-				pDC->GetWorldTransform(&(tempWT[10]));
-				{
-					RotationAround(pDC, this->joints[6], this->branchAngles[10], false);
-					DrawBranch(pDC, { 2.2 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part.emf", 6);
-				}
-				pDC->SetWorldTransform(&(tempWT[10]));
-				DrawJoint(pDC, 6);
-			}
-			pDC->SetWorldTransform(&(tempWT[9]));
-			DrawJoint(pDC, 5);
-		}
-		pDC->SetWorldTransform(&(tempWT[7]));
-		DrawJoint(pDC, 1);
-	}
-	pDC->SetWorldTransform(&(tempWT[0]));
+	RotationAround(pDC, joints[0], -branchAngles[0], false);
 	DrawJoint(pDC, 0);
 
-	if (tempWT != nullptr)
-	{
-		delete[] tempWT;
-		tempWT = nullptr;
-	}
+	pDC->SetWorldTransform(&oldWT);
+	pDC->SetGraphicsMode(oldGM);
 }
 
 void CIND16995View::OnDraw(CDC* pDC)
 {
-	int oldGraphicsMode = pDC->SetGraphicsMode(GM_ADVANCED);
-
 	CRect rect;
 	GetClientRect(&rect);
-	CPoint viewportOrg = pDC->SetViewportOrg((rect.Width() - this->windowSize.cx) / 2, (rect.Height() - this->windowSize.cy) / 2);
+	CPoint viewportOrg = pDC->SetViewportOrg((rect.Width() - windowSize.cx) / 2, (rect.Height() - windowSize.cy) / 2);
 
 	DrawBackground(pDC, RGB(160, 210, 230));
 	DrawCactus(pDC);
 	DrawPot(pDC);
-	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(19 * this->gridSize.cx), int(this->gridSize.cy) });
+	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(19 * gridSize.cx), int(gridSize.cy) });
 
-	if (this->grid)
+	if (grid)
 		DrawGrid(pDC, RGB(255, 255, 255));
 
 	pDC->SetViewportOrg(viewportOrg);
-	pDC->SetGraphicsMode(oldGraphicsMode);
 }
 
 
