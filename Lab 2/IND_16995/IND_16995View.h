@@ -63,11 +63,11 @@ private:
 
 	void DrawBackground(CDC* pDC, COLORREF color);
 	void DrawGrid(CDC* pDC, COLORREF color);
+	void DrawMyText(CDC* pDC, CString text, POINT from);
 	void DrawPot(CDC* pDC);
+	void DrawCactus(CDC* pDC);
 	void DrawJoint(CDC* pDC, int index);
 	void DrawBranch(CDC* pDC, DSIZE size, CString fileName, int jointIndex);
-	void DrawFromMeta(CDC *pDC, CString fileName, CRect &placement);
-	void DrawMyText(CDC* pDC, CString text, POINT from);
 
 	// Transformations
 	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);

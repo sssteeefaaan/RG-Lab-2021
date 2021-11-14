@@ -36,7 +36,7 @@ CIND16995View::CIND16995View() noexcept
 {
 	this->windowSize.SetSize(800, 800);
 	this->gridCount = 20;
-	this->gridSize = { this->windowSize.cx / this->gridCount, this->windowSize.cy / this->gridCount };
+	this->gridSize = { int(this->windowSize.cx / this->gridCount + 0.5), int(this->windowSize.cy / this->gridCount + 0.5) };
 
 	this->grid = false;
 	
@@ -52,7 +52,7 @@ CIND16995View::CIND16995View() noexcept
 	};
 	this->jointRadius = this->gridSize.cx / 2;
 
-	this->branchAngles = new int[11] { 0, 45, 0, -45, 45, 0, 0, -45, +45, -45, 0 };
+	this->branchAngles = new int[11] { 0, 45, 0, -45, 45, 0, 0, -45, 45, -45, 0 };
 }
 
 CIND16995View::~CIND16995View()
@@ -96,15 +96,15 @@ void CIND16995View::DrawGrid(CDC* pDC, COLORREF color)
 	POINT* points = new POINT[pointsSize];
 	DWORD* lenghts = new DWORD[lengthsSize];
 
-	for (int i = 0; i < pointsSize; i+=4)
+	for (int i = 0; i < pointsSize; i += 4)
 	{
-		int tempY = (i>>2) * this->gridSize.cy,
-			tempX = (i>>2) * this->gridSize.cx;
+		int tempY = (i >> 2) * this->gridSize.cy,
+			tempX = (i >> 2) * this->gridSize.cx;
 
-		points[i] = { 0, tempY };
-		points[i + 1] = { this->windowSize.cx, tempY };
-		points[i + 2] = { tempX, 0 };
-		points[i + 3] = { tempX, this->windowSize.cy };
+		points[i]		= {			  0,					tempY		};
+		points[i + 1]	= { this->windowSize.cx,			tempY		};
+		points[i + 2]	= {			tempX,					  0			};
+		points[i + 3]	= {			tempX,			this->windowSize.cy };
 	}
 
 	for (int i = 0; i < lengthsSize; i++)
@@ -159,13 +159,14 @@ void CIND16995View::DrawJoint(CDC* pDC, int index)
 void CIND16995View::DrawBranch(CDC* pDC, DSIZE size, CString fileName, int jointIndex)
 {
 	CRect placement;
+	double dx = (size.cx / 2);
 	placement.SetRect(
 		{
-			int(this->joints[jointIndex].x - size.cx / 2 + 0.5),
+			int(this->joints[jointIndex].x - dx + 0.5),
 			int(this->joints[jointIndex].y - size.cy + 0.5)
 		},
 		{
-			int(this->joints[jointIndex].x + size.cx / 2 + 0.5),
+			int(this->joints[jointIndex].x + dx + 0.5),
 			int(this->joints[jointIndex].y + 0.5) // - this->jointRadius
 		});
 	
@@ -174,14 +175,6 @@ void CIND16995View::DrawBranch(CDC* pDC, DSIZE size, CString fileName, int joint
 	DeleteEnhMetaFile(mf);
 }
 
-void CIND16995View::DrawFromMeta(CDC* pDC, CString fileName, CRect & placement)
-{
-	HENHMETAFILE mf = GetEnhMetaFile(fileName);
-
-	pDC->PlayMetaFile(mf, placement);
-
-	DeleteEnhMetaFile(mf);
-}
 void CIND16995View::DrawMyText(CDC* pDC, CString text, POINT from)
 {
 	LOGFONT logF{};
@@ -208,12 +201,12 @@ void CIND16995View::DrawMyText(CDC* pDC, CString text, POINT from)
 	pDC->SetTextColor(RGB(255, 255, 0));
 	pDC->TextOut(from.x, from.y, text);
 
-	font.DeleteObject();
-
 	pDC->SetTextColor(oldColor);
 	pDC->SetTextAlign(align);
 	pDC->SetBkMode(bkMode);
 	pDC->SelectObject(oldFont);
+
+	font.DeleteObject();
 }
 
 // Transformations
@@ -271,23 +264,15 @@ void CIND16995View::Reflect(CDC* pDC, float dX, float dY, bool rightMultiply)
 	this->Scale(pDC, dX, dY, rightMultiply);
 }
 
-void CIND16995View::OnDraw(CDC* pDC)
+void CIND16995View::DrawCactus(CDC* pDC)
 {
-	int oldGraphicsMode = pDC->SetGraphicsMode(GM_ADVANCED);
-
-	CRect rect;
-	GetClientRect(&rect);
-	CPoint viewportOrg = pDC->SetViewportOrg((rect.Width() - this->windowSize.cx) / 2, (rect.Height() - this->windowSize.cy) / 2);
-
-	DrawBackground(pDC, RGB(160, 210, 230));
-
-	XFORM *tempWT = new XFORM[11];
+	XFORM* tempWT = new XFORM[11];
 
 	pDC->GetWorldTransform(&(tempWT[0]));
 	{
 		RotationAround(pDC, this->joints[0], this->branchAngles[0], false);
 		DrawBranch(pDC, { 2.2 * this->gridSize.cx, 3.0 * this->gridSize.cy }, (CString)"cactus_part_light.emf", 0);
-		
+
 		pDC->GetWorldTransform(&(tempWT[1]));
 		{
 			RotationAround(pDC, this->joints[1], this->branchAngles[1], false);
@@ -361,7 +346,6 @@ void CIND16995View::OnDraw(CDC* pDC)
 				DrawJoint(pDC, 6);
 			}
 			pDC->SetWorldTransform(&(tempWT[9]));
-
 			DrawJoint(pDC, 5);
 		}
 		pDC->SetWorldTransform(&(tempWT[7]));
@@ -375,9 +359,20 @@ void CIND16995View::OnDraw(CDC* pDC)
 		delete[] tempWT;
 		tempWT = nullptr;
 	}
+}
 
+void CIND16995View::OnDraw(CDC* pDC)
+{
+	int oldGraphicsMode = pDC->SetGraphicsMode(GM_ADVANCED);
+
+	CRect rect;
+	GetClientRect(&rect);
+	CPoint viewportOrg = pDC->SetViewportOrg((rect.Width() - this->windowSize.cx) / 2, (rect.Height() - this->windowSize.cy) / 2);
+
+	DrawBackground(pDC, RGB(160, 210, 230));
+	DrawCactus(pDC);
 	DrawPot(pDC);
-	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(19 * this->gridSize.cx), int(1 * this->gridSize.cy) });
+	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(19 * this->gridSize.cx), int(this->gridSize.cy) });
 
 	if (this->grid)
 		DrawGrid(pDC, RGB(255, 255, 255));
@@ -432,76 +427,47 @@ CIND16995Doc* CIND16995View::GetDocument() const // non-debug version is inline
 
 void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+	int val = 5;
+	if(GetKeyState(VK_SHIFT) & 0x8000)
+		val *= -1;
+
 	switch (nChar)
 	{
 	case(VK_SPACE):
 		this->grid = !this->grid;
 		break;
 	case('Q'):
-		this->branchAngles[0] -= 5;
+		this->branchAngles[0] -= val;
 		break;
 	case('W'):
-		this->branchAngles[0] += 5;
-		break;
-	case('A'):
-		this->branchAngles[1] -= 5;
-		break;
-	case('S'):
-		this->branchAngles[1] += 5;
-		break;
-	case('Y'):
-		this->branchAngles[2] -= 5;
-		break;
-	case('X'):
-		this->branchAngles[2] += 5;
+		this->branchAngles[1] += val;
 		break;
 	case('E'):
-		this->branchAngles[3] -= 5;
+		this->branchAngles[2] -= val;
 		break;
 	case('R'):
-		this->branchAngles[3] += 5;
-		break;
-	case('D'):
-		this->branchAngles[4] -= 5;
-		break;
-	case('F'):
-		this->branchAngles[4] += 5;
-		break;
-	case('C'):
-		this->branchAngles[5] -= 5;
-		break;
-	case('V'):
-		this->branchAngles[5] += 5;
+		this->branchAngles[3] += val;
 		break;
 	case('T'):
-		this->branchAngles[6] -= 5;
+		this->branchAngles[4] -= val;
 		break;
 	case('Z'):
-		this->branchAngles[6] += 5;
-		break;
-	case('G'):
-		this->branchAngles[7] -= 5;
-		break;
-	case('H'):
-		this->branchAngles[7] += 5;
-		break;
-	case('B'):
-		this->branchAngles[8] -= 5;
-		break;
-	case('N'):
-		this->branchAngles[8] += 5;
+		this->branchAngles[5] += val;
 		break;
 	case('U'):
-		this->branchAngles[9] -= 5;
+		this->branchAngles[6] -= val;
 		break;
 	case('I'):
-		this->branchAngles[9] += 5;
+		this->branchAngles[7] += val;
 		break;
-	case('J'):
-		this->branchAngles[10] -= 5;
+	case('O'):
+		this->branchAngles[8] -= val;
 		break;
-	case('K'):
-		this->branchAngles[10] += 5;
+	case('P'):
+		this->branchAngles[9] += val;
+		break;
+	case('A'):
+		this->branchAngles[10] -= val;
 		break;
 	default:
 		break;
