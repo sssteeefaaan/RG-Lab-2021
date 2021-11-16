@@ -67,18 +67,18 @@ private:
 	void DrawPot(CDC* pDC);
 	void DrawCactus(CDC* pDC);
 	void DrawJoint(CDC* pDC, int index);
-	void DrawBranch(CDC* pDC, DSIZE size, CString fileName, int jointIndex);
+	void DrawBranch(CDC* pDC, CString fileName, int jointIndex, double sX, double sY);
 
 	// Transformations
+	void ModWorld(CDC* pDC, XFORM* matrix, bool rightMultiply);
+
 	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
 	void Rotate(CDC* pDC, double angle, bool rightMultiply);
-
-	void RotationAround(CDC* pDC, DPOINT center, double angle, bool rightMultiply);
-
 	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
 	void Reflect(CDC* pDC, float dX, float dY, bool rightMultiply);
 
-	void ModWorld(CDC* pDC, XFORM* matrix, bool rightMultiply);
+	void TRT(CDC* pDC, DPOINT center, double angle, bool rightMultiply);
+	void TST(CDC* pDC, DPOINT center, double sX, double sY, bool rightMultiply);
 
 public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);

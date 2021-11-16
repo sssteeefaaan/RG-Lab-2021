@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize.SetSize(800, 800);
+	this->windowSize.SetSize(500, 500);
 	this->gridCount = 20;
 	this->gridSize = { int(this->windowSize.cx / this->gridCount + 0.5), int(this->windowSize.cy / this->gridCount + 0.5) };
 
@@ -52,7 +52,7 @@ CIND16995View::CIND16995View() noexcept
 	};
 	this->jointRadius = this->gridSize.cx / 2;
 
-	this->branchAngles = new int[11] { 0, 45, 0, -45, 45, 0, 0, -45, 45, -45, 0 };
+	this->branchAngles = new int[11] { 0, 45, 0, 45, -45, 0, 0, -45, 45, -45, 0 };
 }
 
 CIND16995View::~CIND16995View()
@@ -156,23 +156,27 @@ void CIND16995View::DrawJoint(CDC* pDC, int index)
 	delete pDC->SelectObject(oldBrush);
 }
 
-void CIND16995View::DrawBranch(CDC* pDC, DSIZE size, CString fileName, int jointIndex)
+void CIND16995View::DrawBranch(CDC* pDC, CString fileName, int jointIndex, double sX, double sY)
 {
 	CRect placement;
-	double dx = (size.cx / 2);
+	double dx = gridSize.cx / 2;
 	placement.SetRect(
 		{
 			int(this->joints[jointIndex].x - dx + 0.5),
-			int(this->joints[jointIndex].y - size.cy + 0.5)
+			int(this->joints[jointIndex].y - gridSize.cy + 0.5)
 		},
 		{
 			int(this->joints[jointIndex].x + dx + 0.5),
 			int(this->joints[jointIndex].y + 0.5) // - this->jointRadius
 		});
-	
+
+	TST(pDC, this->joints[jointIndex], sX, sY, false);
+
 	HENHMETAFILE mf = GetEnhMetaFile(fileName);
 	pDC->PlayMetaFile(mf, placement);
 	DeleteEnhMetaFile(mf);
+
+	TST(pDC, this->joints[jointIndex], 1.0 / sX, 1.0 / sY, false);
 }
 
 void CIND16995View::DrawMyText(CDC* pDC, CString text, POINT from)
@@ -231,13 +235,13 @@ void CIND16995View::Rotate(CDC* pDC, double angle, bool rightMultiply = true)
 	XFORM matrix;
 	matrix.eM11 = matrix.eM22 = cos(dw);
 	matrix.eM12 = sin(dw);
-	matrix.eM21 = -1 * matrix.eM12;
+	matrix.eM21 = -matrix.eM12;
 	matrix.eDx = matrix.eDy = 0;
 
 	this->ModWorld(pDC, &matrix, rightMultiply);
 }
 
-void CIND16995View::RotationAround(CDC* pDC, DPOINT center, double angle, bool rightMultiply)
+void CIND16995View::TRT(CDC* pDC, DPOINT center, double angle, bool rightMultiply)
 {
 	if (rightMultiply)
 	{
@@ -249,6 +253,22 @@ void CIND16995View::RotationAround(CDC* pDC, DPOINT center, double angle, bool r
 	{
 		Translate(pDC, center.x, center.y, false);
 		Rotate(pDC, angle, false);
+		Translate(pDC, -center.x, -center.y, false);
+	}
+}
+
+void CIND16995View::TST(CDC* pDC, DPOINT center, double sX, double sY, bool rightMultiply)
+{
+	if (rightMultiply)
+	{
+		Translate(pDC, -center.x, -center.y, true);
+		Scale(pDC, sX, sY, true);
+		Translate(pDC, center.x, center.y, true);
+	}
+	else
+	{
+		Translate(pDC, center.x, center.y, false);
+		Scale(pDC, sX , sY, false);
 		Translate(pDC, -center.x, -center.y, false);
 	}
 }
@@ -270,58 +290,66 @@ void CIND16995View::DrawCactus(CDC* pDC)
 	XFORM oldWT{};
 	pDC->GetWorldTransform(&oldWT);
 
-	RotationAround(pDC, joints[0], branchAngles[0], false);
-	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part_light.emf", 0);
+	TRT(pDC, joints[0], branchAngles[0], false);
+	DrawBranch(pDC, (CString)"cactus_part_light.emf", 0, 2.2, 3.0);
 
-	RotationAround(pDC, joints[1], branchAngles[1], false);
-	DrawBranch(pDC, { 0.8 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 1);
+	TRT(pDC, joints[1], branchAngles[1], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 1, 0.8, 3.0);
 
-	RotationAround(pDC, joints[2], branchAngles[2], false);
-	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 2);
+	TRT(pDC, joints[2], branchAngles[2], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 2, 2.2, 3.0);
 
-	RotationAround(pDC, joints[3], branchAngles[3], false);
-	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 3);
+	TRT(pDC, joints[3], branchAngles[3], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 3, 1.5, 3.0);
+
+	// TRT(pDC, joints[3], -branchAngles[3], false);
 	
-	RotationAround(pDC, joints[3], branchAngles[4] - branchAngles[3], false);
-	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 3);
-				
-	RotationAround(pDC, joints[3], -branchAngles[4], false);
+	TRT(pDC, joints[3], branchAngles[4] - branchAngles[3], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 3, 1.5, 3.0);
+	
+	TRT(pDC, joints[3], -branchAngles[4], false);
 	DrawJoint(pDC, 3);
 
-	RotationAround(pDC, joints[2], -branchAngles[2], false);
+	TRT(pDC, joints[2], -branchAngles[2], false);
 	DrawJoint(pDC, 2);
 	
-	RotationAround(pDC, joints[1], branchAngles[5] - branchAngles[1], false);
-	DrawBranch(pDC, { 0.8 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 1);
+	// TRT(pDC, joints[1], -branchAngles[1], false);
 
-	RotationAround(pDC, joints[4], branchAngles[6], false);
-	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part_light.emf", 4);
-			
-	RotationAround(pDC, joints[4], -branchAngles[6], false);
+	TRT(pDC, joints[1], branchAngles[5] - branchAngles[1], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 1, 0.8, 3.0);
+
+	TRT(pDC, joints[4], branchAngles[6], false);
+	DrawBranch(pDC, (CString)"cactus_part_light.emf", 4, 2.2, 3.0);
+
+	TRT(pDC, joints[4], -branchAngles[6], false);
 	DrawJoint(pDC, 4);
-		
-	RotationAround(pDC, joints[1], branchAngles[7] - branchAngles[5], false);
-	DrawBranch(pDC, { 0.8 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 1);
 
-	RotationAround(pDC, joints[5], branchAngles[8], false);
-	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 5);
-		
-	RotationAround(pDC, joints[5], branchAngles[9] - branchAngles[8], false);
-	DrawBranch(pDC, { 1.5 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 5);
+	// TRT(pDC, joints[1], -branchAngles[5], false);
+	
+	TRT(pDC, joints[1], branchAngles[7] - branchAngles[5], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 1, 0.8, 3.0);
 
-	RotationAround(pDC, joints[6], branchAngles[10], false);
-	DrawBranch(pDC, { 2.2 * gridSize.cx, 3.0 * gridSize.cy }, (CString)"cactus_part.emf", 6);
+	TRT(pDC, joints[5], branchAngles[8], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 5, 1.5, 3);
 		
-	RotationAround(pDC, joints[6], -branchAngles[10], false);
+	// TRT(pDC, joints[5], -branchAngles[8], false);
+	
+	TRT(pDC, joints[5], branchAngles[9] - branchAngles[8], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 5, 1.5, 3);
+ 
+	TRT(pDC, joints[6], branchAngles[10], false);
+	DrawBranch(pDC, (CString)"cactus_part.emf", 6, 2.2, 3.0);
+
+	TRT(pDC, joints[6], -branchAngles[10], false);
 	DrawJoint(pDC, 6);
 		
-	RotationAround(pDC, joints[5], -branchAngles[9], false);
+	TRT(pDC, joints[5], -branchAngles[9], false);
 	DrawJoint(pDC, 5);
 	
-	RotationAround(pDC, joints[1], -branchAngles[7], false);
+	TRT(pDC, joints[1], -branchAngles[7], false);
 	DrawJoint(pDC, 1);
 
-	RotationAround(pDC, joints[0], -branchAngles[0], false);
+	TRT(pDC, joints[0], -branchAngles[0], false);
 	DrawJoint(pDC, 0);
 
 	pDC->SetWorldTransform(&oldWT);
@@ -330,9 +358,21 @@ void CIND16995View::DrawCactus(CDC* pDC)
 
 void CIND16995View::OnDraw(CDC* pDC)
 {
-	CRect rect;
+	CRect rect, view;
 	GetClientRect(&rect);
-	CPoint viewportOrg = pDC->SetViewportOrg((rect.Width() - windowSize.cx) / 2, (rect.Height() - windowSize.cy) / 2);
+	view.SetRect(
+		int((rect.Width() - windowSize.cx) / 2 + 0.5),
+		int((rect.Height() - windowSize.cy) / 2 + 0.5),
+		int((rect.Width() + windowSize.cx) / 2 + 0.5),
+		int((rect.Height() + windowSize.cy) / 2 + 0.5)
+	);
+	
+	CRgn clip;
+	clip.CreateRectRgn(view.left, view.top, view.right, view.bottom);
+	pDC->GetClipBox(&rect);
+	pDC->SelectClipRgn(&clip);
+
+	CPoint viewportOrg = pDC->SetViewportOrg(view.TopLeft());
 
 	DrawBackground(pDC, RGB(160, 210, 230));
 	DrawCactus(pDC);
@@ -343,6 +383,8 @@ void CIND16995View::OnDraw(CDC* pDC)
 		DrawGrid(pDC, RGB(255, 255, 255));
 
 	pDC->SetViewportOrg(viewportOrg);
+	clip.SetRectRgn(rect);
+	pDC->SelectClipRgn(&clip);
 }
 
 
