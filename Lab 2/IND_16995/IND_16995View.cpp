@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize.SetSize(800, 800);
+	this->windowSize.SetSize(500, 500);
 	this->gridCount = 20;
 	this->gridSize = { int(this->windowSize.cx / this->gridCount + 0.5), int(this->windowSize.cy / this->gridCount + 0.5) };
 
@@ -46,13 +46,13 @@ CIND16995View::CIND16995View() noexcept
 		{	double(10	* this->gridSize.cx),		double(14	* this->gridSize.cy) },
 		{	double(10	* this->gridSize.cx),		double(11	* this->gridSize.cy) },
 		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(11	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(11	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) }
+		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) },
+		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) },
+		{	double(10	* this->gridSize.cx),		double(11	* this->gridSize.cy) }
 	};
 	this->jointRadius = this->gridSize.cx / 2;
 
-	this->branchAngles = new int[11] { 0, 45, 0, 45, -45, 0, 0, -45, 45, -45, 0 };
+	this->branchAngles = new int[11] { 0, 45, 45, 45, -45, 0, 0, -45, 0, -45, 0 };
 }
 
 CIND16995View::~CIND16995View()
@@ -187,15 +187,14 @@ void CIND16995View::DrawMyText(CDC* pDC, CString text, POINT from)
 {
 	LOGFONT logF{};
 	logF.lfHeight = this->gridSize.cx + 5;
-	logF.lfEscapement = -900;
-	logF.lfOrientation = -900;
+	logF.lfEscapement = 0;
+	logF.lfOrientation = 0;
 	logF.lfWeight = FW_DEMIBOLD; // | FW_NORMAL;
 	logF.lfCharSet = ANSI_CHARSET;
 	wcscpy_s(logF.lfFaceName, 32, L"Times New Roman");
 
 	CFont font;
-	//font.CreateFont(this->gridSize.cx + 5, 0, -900, -900, FW_DEMIBOLD, 0, 0, 0, ANSI_CHARSET, 0, 0, 0, 0, L"Times New Roman");
-	//font.CreateFontIndirect(&logF);
+	// font.CreateFont(this->gridSize.cx + 5, 0, -900, 0, FW_DEMIBOLD, 0, 0, 0, ANSI_CHARSET, 0, 0, 0, 0, L"Times New Roman");
 	font.CreateFontIndirect(&logF);
 
 	CFont* oldFont = pDC->SelectObject(&font);
@@ -218,19 +217,12 @@ void CIND16995View::DrawMyText(CDC* pDC, CString text, POINT from)
 }
 
 // Transformations
-void CIND16995View::ModWorld(CDC* pDC, XFORM* matrix, bool rightMultiply)
-{
-	if (rightMultiply)
-		pDC->ModifyWorldTransform(matrix, MWT_RIGHTMULTIPLY);
-	else
-		pDC->ModifyWorldTransform(matrix, MWT_LEFTMULTIPLY);
-}
 
 void CIND16995View::Translate(CDC* pDC, float dX, float dY, bool rightMultiply)
 {
 	XFORM matrix = { 1, 0, 0, 1, dX, dY };
 
-	this->ModWorld(pDC, &matrix, rightMultiply);
+	pDC->ModifyWorldTransform(&matrix, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
 }
 void CIND16995View::Rotate(CDC* pDC, double angle, bool rightMultiply = true)
 {
@@ -242,7 +234,7 @@ void CIND16995View::Rotate(CDC* pDC, double angle, bool rightMultiply = true)
 	matrix.eM21 = -matrix.eM12;
 	matrix.eDx = matrix.eDy = 0;
 
-	this->ModWorld(pDC, &matrix, rightMultiply);
+	pDC->ModifyWorldTransform(&matrix, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
 }
 
 void CIND16995View::TRT(CDC* pDC, DPOINT center, double angle, bool rightMultiply)
@@ -281,7 +273,7 @@ void CIND16995View::Scale(CDC* pDC, float sX, float sY, bool rightMultiply)
 {
 	XFORM matrix = { sX, 0, 0, sY, 0, 0 };
 
-	this->ModWorld(pDC, &matrix, rightMultiply);
+	pDC->ModifyWorldTransform(&matrix, rightMultiply ? MWT_RIGHTMULTIPLY : MWT_LEFTMULTIPLY);
 }
 void CIND16995View::Reflect(CDC* pDC, float dX, float dY, bool rightMultiply)
 {
@@ -290,56 +282,50 @@ void CIND16995View::Reflect(CDC* pDC, float dX, float dY, bool rightMultiply)
 
 void CIND16995View::DrawCactus(CDC* pDC)
 {
-	int oldGM = pDC->SetGraphicsMode(GM_ADVANCED);
-	XFORM oldWT{};
+	XFORM oldWT;
 	pDC->GetWorldTransform(&oldWT);
 
 	TRT(pDC, joints[0], branchAngles[0], false);
-	DrawBranch(pDC, 0, 2.2, 3.0, false);
+	DrawBranch(pDC, 0, 2.2, 3.0, true);
 
 	TRT(pDC, joints[1], branchAngles[1], false);
-	DrawBranch(pDC, 1, 0.8, 3.0, true);
+	DrawBranch(pDC, 1, 1.5, 3.0, false);
 
 	TRT(pDC, joints[2], branchAngles[2], false);
-	DrawBranch(pDC, 2, 2.2, 3.0, true);
+	DrawBranch(pDC, 2, 0.8, 3.0, true);
 
 	TRT(pDC, joints[3], branchAngles[3], false);
 	DrawBranch(pDC, 3, 1.5, 3.0, true);
-
-	// TRT(pDC, joints[3], -branchAngles[3], false);
 	
 	TRT(pDC, joints[3], branchAngles[4] - branchAngles[3], false);
-	DrawBranch(pDC, 3, 1.5, 3.0, true);
+	DrawBranch(pDC, 3, 1.5, 3.0, false);
 	
 	TRT(pDC, joints[3], -branchAngles[4], false);
 	DrawJoint(pDC, 3);
 
-	TRT(pDC, joints[2], -branchAngles[2], false);
-	DrawJoint(pDC, 2);
-	
-	// TRT(pDC, joints[1], -branchAngles[1], false);
-
-	TRT(pDC, joints[1], branchAngles[5] - branchAngles[1], false);
-	DrawBranch(pDC, 1, 0.8, 3.0, true);
+	TRT(pDC, joints[2], branchAngles[5] - branchAngles[2], false);
+	DrawBranch(pDC, 2, 0.8, 3.0, true);
 
 	TRT(pDC, joints[4], branchAngles[6], false);
-	DrawBranch(pDC, 4, 2.2, 3.0, false);
+	DrawBranch(pDC, 4, 2.2, 3.0, true);
 
 	TRT(pDC, joints[4], -branchAngles[6], false);
 	DrawJoint(pDC, 4);
-
-	// TRT(pDC, joints[1], -branchAngles[5], false);
 	
-	TRT(pDC, joints[1], branchAngles[7] - branchAngles[5], false);
-	DrawBranch(pDC,  1, 0.8, 3.0, true);
+	TRT(pDC, joints[2], branchAngles[7] - branchAngles[5], false);
+	DrawBranch(pDC,  2, 0.8, 3.0, true);
 
 	TRT(pDC, joints[5], branchAngles[8], false);
-	DrawBranch(pDC, 5, 1.5, 3, true);
-		
-	// TRT(pDC, joints[5], -branchAngles[8], false);
+	DrawBranch(pDC, 5, 2.2, 3.0, true);
 	
-	TRT(pDC, joints[5], branchAngles[9] - branchAngles[8], false);
-	DrawBranch(pDC, 5, 1.5, 3, true);
+	TRT(pDC, joints[5], -branchAngles[8], false);
+	DrawJoint(pDC, 5);
+
+	TRT(pDC, joints[2], -branchAngles[7], false);
+	DrawJoint(pDC, 2);
+
+	TRT(pDC, joints[1], branchAngles[9] - branchAngles[1], false);
+	DrawBranch(pDC, 1, 1.5, 3.0, true);
  
 	TRT(pDC, joints[6], branchAngles[10], false);
 	DrawBranch(pDC, 6, 2.2, 3.0, true);
@@ -347,17 +333,13 @@ void CIND16995View::DrawCactus(CDC* pDC)
 	TRT(pDC, joints[6], -branchAngles[10], false);
 	DrawJoint(pDC, 6);
 		
-	TRT(pDC, joints[5], -branchAngles[9], false);
-	DrawJoint(pDC, 5);
-	
-	TRT(pDC, joints[1], -branchAngles[7], false);
+	TRT(pDC, joints[1], -branchAngles[9], false);
 	DrawJoint(pDC, 1);
-
+	
 	TRT(pDC, joints[0], -branchAngles[0], false);
 	DrawJoint(pDC, 0);
 
 	pDC->SetWorldTransform(&oldWT);
-	pDC->SetGraphicsMode(oldGM);
 }
 
 void CIND16995View::OnDraw(CDC* pDC)
@@ -377,15 +359,26 @@ void CIND16995View::OnDraw(CDC* pDC)
 	pDC->SelectClipRgn(&clip);
 
 	CPoint viewportOrg = pDC->SetViewportOrg(view.TopLeft());
+	int oldGM = pDC->SetGraphicsMode(GM_ADVANCED);
 
 	DrawBackground(pDC, RGB(160, 210, 230));
+
+	XFORM oldWT;
+	pDC->GetWorldTransform(&oldWT);
+	pDC->ModifyWorldTransform(nullptr, MWT_IDENTITY);
+
+	TRT(pDC, { (double)windowSize.cx / 2, (double)windowSize.cy / 2 }, -90, false);
+
 	DrawCactus(pDC);
 	DrawPot(pDC);
-	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(19 * gridSize.cx), int(gridSize.cy) });
+	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(gridSize.cx), int(gridSize.cy) });
+
+	pDC->SetWorldTransform(&oldWT);
 
 	if (grid)
 		DrawGrid(pDC, RGB(255, 255, 255));
 
+	pDC->SetGraphicsMode(oldGM);
 	pDC->SetViewportOrg(viewportOrg);
 	clip.SetRectRgn(rect);
 	pDC->SelectClipRgn(&clip);
@@ -437,7 +430,7 @@ CIND16995Doc* CIND16995View::GetDocument() const // non-debug version is inline
 
 void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	int val = GetKeyState(VK_SHIFT) & 0x8000 ? -5 : 5;
+	int val = GetKeyState(VK_SHIFT) & 0x8000 ? -30 : 30;
 
 	switch (nChar)
 	{

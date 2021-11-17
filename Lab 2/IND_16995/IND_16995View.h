@@ -70,8 +70,6 @@ private:
 	void DrawBranch(CDC* pDC, int jointIndex, double sX, double sY, bool isDark);
 
 	// Transformations
-	void ModWorld(CDC* pDC, XFORM* matrix, bool rightMultiply);
-
 	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
 	void Rotate(CDC* pDC, double angle, bool rightMultiply);
 	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
