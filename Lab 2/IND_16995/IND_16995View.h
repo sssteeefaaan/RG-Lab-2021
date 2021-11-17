@@ -67,7 +67,7 @@ private:
 	void DrawPot(CDC* pDC);
 	void DrawCactus(CDC* pDC);
 	void DrawJoint(CDC* pDC, int index);
-	void DrawBranch(CDC* pDC, CString fileName, int jointIndex, double sX, double sY);
+	void DrawBranch(CDC* pDC, int jointIndex, double sX, double sY, bool isDark);
 
 	// Transformations
 	void ModWorld(CDC* pDC, XFORM* matrix, bool rightMultiply);

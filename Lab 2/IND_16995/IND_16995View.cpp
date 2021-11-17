@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize.SetSize(500, 500);
+	this->windowSize.SetSize(800, 800);
 	this->gridCount = 20;
 	this->gridSize = { int(this->windowSize.cx / this->gridCount + 0.5), int(this->windowSize.cy / this->gridCount + 0.5) };
 
@@ -129,7 +129,7 @@ void CIND16995View::DrawPot(CDC* pDC)
 	};
 
 	pDC->Polygon(points, 4);
-	pDC->Rectangle(int(7.6 * this->gridSize.cx + 0.5), int(17.2 * this->gridSize.cy + 0.5), int(12.4 * this->gridSize.cx + 0.5), int(18 * this->gridSize.cy + 0.5) + 1);
+	pDC->Rectangle(int(7.6 * this->gridSize.cx + 0.5), int(17.2 * this->gridSize.cy + 0.5), int(12.4 * this->gridSize.cx + 0.5), int(18 * this->gridSize.cy + 0.5));
 
 	pDC->EndPath();
 
@@ -156,8 +156,12 @@ void CIND16995View::DrawJoint(CDC* pDC, int index)
 	delete pDC->SelectObject(oldBrush);
 }
 
-void CIND16995View::DrawBranch(CDC* pDC, CString fileName, int jointIndex, double sX, double sY)
+void CIND16995View::DrawBranch(CDC* pDC, int jointIndex, double sX, double sY, bool isDark)
 {
+	HENHMETAFILE mf = GetEnhMetaFile(isDark ? _T("cactus_part.emf") : _T("cactus_part_light.emf"));
+	/*ENHMETAHEADER header;
+	GetEnhMetaFileHeader(mf, sizeof(ENHMETAHEADER), &header);*/
+
 	CRect placement;
 	double dx = gridSize.cx / 2;
 	placement.SetRect(
@@ -172,11 +176,11 @@ void CIND16995View::DrawBranch(CDC* pDC, CString fileName, int jointIndex, doubl
 
 	TST(pDC, this->joints[jointIndex], sX, sY, false);
 
-	HENHMETAFILE mf = GetEnhMetaFile(fileName);
-	pDC->PlayMetaFile(mf, placement);
-	DeleteEnhMetaFile(mf);
+	PlayEnhMetaFile(pDC->m_hDC, mf, placement);
 
 	TST(pDC, this->joints[jointIndex], 1.0 / sX, 1.0 / sY, false);
+
+	DeleteEnhMetaFile(mf);
 }
 
 void CIND16995View::DrawMyText(CDC* pDC, CString text, POINT from)
@@ -291,21 +295,21 @@ void CIND16995View::DrawCactus(CDC* pDC)
 	pDC->GetWorldTransform(&oldWT);
 
 	TRT(pDC, joints[0], branchAngles[0], false);
-	DrawBranch(pDC, (CString)"cactus_part_light.emf", 0, 2.2, 3.0);
+	DrawBranch(pDC, 0, 2.2, 3.0, false);
 
 	TRT(pDC, joints[1], branchAngles[1], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 1, 0.8, 3.0);
+	DrawBranch(pDC, 1, 0.8, 3.0, true);
 
 	TRT(pDC, joints[2], branchAngles[2], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 2, 2.2, 3.0);
+	DrawBranch(pDC, 2, 2.2, 3.0, true);
 
 	TRT(pDC, joints[3], branchAngles[3], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 3, 1.5, 3.0);
+	DrawBranch(pDC, 3, 1.5, 3.0, true);
 
 	// TRT(pDC, joints[3], -branchAngles[3], false);
 	
 	TRT(pDC, joints[3], branchAngles[4] - branchAngles[3], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 3, 1.5, 3.0);
+	DrawBranch(pDC, 3, 1.5, 3.0, true);
 	
 	TRT(pDC, joints[3], -branchAngles[4], false);
 	DrawJoint(pDC, 3);
@@ -316,10 +320,10 @@ void CIND16995View::DrawCactus(CDC* pDC)
 	// TRT(pDC, joints[1], -branchAngles[1], false);
 
 	TRT(pDC, joints[1], branchAngles[5] - branchAngles[1], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 1, 0.8, 3.0);
+	DrawBranch(pDC, 1, 0.8, 3.0, true);
 
 	TRT(pDC, joints[4], branchAngles[6], false);
-	DrawBranch(pDC, (CString)"cactus_part_light.emf", 4, 2.2, 3.0);
+	DrawBranch(pDC, 4, 2.2, 3.0, false);
 
 	TRT(pDC, joints[4], -branchAngles[6], false);
 	DrawJoint(pDC, 4);
@@ -327,18 +331,18 @@ void CIND16995View::DrawCactus(CDC* pDC)
 	// TRT(pDC, joints[1], -branchAngles[5], false);
 	
 	TRT(pDC, joints[1], branchAngles[7] - branchAngles[5], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 1, 0.8, 3.0);
+	DrawBranch(pDC,  1, 0.8, 3.0, true);
 
 	TRT(pDC, joints[5], branchAngles[8], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 5, 1.5, 3);
+	DrawBranch(pDC, 5, 1.5, 3, true);
 		
 	// TRT(pDC, joints[5], -branchAngles[8], false);
 	
 	TRT(pDC, joints[5], branchAngles[9] - branchAngles[8], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 5, 1.5, 3);
+	DrawBranch(pDC, 5, 1.5, 3, true);
  
 	TRT(pDC, joints[6], branchAngles[10], false);
-	DrawBranch(pDC, (CString)"cactus_part.emf", 6, 2.2, 3.0);
+	DrawBranch(pDC, 6, 2.2, 3.0, true);
 
 	TRT(pDC, joints[6], -branchAngles[10], false);
 	DrawJoint(pDC, 6);
@@ -433,9 +437,7 @@ CIND16995Doc* CIND16995View::GetDocument() const // non-debug version is inline
 
 void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	int val = 5;
-	if(GetKeyState(VK_SHIFT) & 0x8000)
-		val *= -1;
+	int val = GetKeyState(VK_SHIFT) & 0x8000 ? -5 : 5;
 
 	switch (nChar)
 	{

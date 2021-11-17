@@ -34,9 +34,9 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize.SetRect({ 0,0 }, { 500, 500 });
+	this->windowSize.SetRect({ 0,0 }, { 800, 800 });
 	this->gridCount = 20;
-	this->gridSize = int(500 / this->gridCount + 0.5);
+	this->gridSize = int(800 / this->gridCount + 0.5);
 	this->backgroundColor = RGB(200, 200, 200);
 	this->selectedPen = { PS_GEOMETRIC | PS_DASH | PS_JOIN_ROUND | PS_ENDCAP_ROUND, 4, { BS_SOLID, RGB(235, 0, 255) } };
 
