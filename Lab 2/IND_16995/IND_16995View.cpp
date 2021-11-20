@@ -52,6 +52,7 @@ CIND16995View::CIND16995View() noexcept
 	};
 	this->jointRadius = this->gridSize.cx / 2;
 
+	this->photoAngle = -90;
 	this->branchAngles = new int[11] { 0, 45, 45, 45, -45, 0, 0, -45, 0, -45, 0 };
 }
 
@@ -367,7 +368,7 @@ void CIND16995View::OnDraw(CDC* pDC)
 	pDC->GetWorldTransform(&oldWT);
 	pDC->ModifyWorldTransform(nullptr, MWT_IDENTITY);
 
-	TRT(pDC, { (double)windowSize.cx / 2, (double)windowSize.cy / 2 }, -90, false);
+	TRT(pDC, { (double)windowSize.cx / 2, (double)windowSize.cy / 2 }, this->photoAngle, false);
 
 	DrawCactus(pDC);
 	DrawPot(pDC);
@@ -436,6 +437,9 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 	case(VK_SPACE):
 		this->grid = !this->grid;
+		break;
+	case('S'):
+		this->photoAngle += val * 3;
 		break;
 	case('Q'):
 		this->branchAngles[0] += val;

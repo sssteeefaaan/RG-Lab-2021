@@ -6,15 +6,15 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "DImage.h"
 
-struct DPOINT {
-	double x;
-	double y;
-};
-
-struct DSIZE {
-	double cx;
-	double cy;
+typedef struct PuzzlePiece {
+	CString file;
+	int angle;
+	bool mx;
+	bool my;
+	int i;
+	int j;
 };
 
 class CIND16995View : public CView
@@ -27,13 +27,39 @@ protected: // create from serialization only
 public:
 	CIND16995Doc* GetDocument() const;
 
-// Operations
-public:
+private:
+	int windowSize;
+	int gridNumb;
+	double gridSize;
+	double picSize;
+	PuzzlePiece *pieces;
+	PuzzlePiece* selected;
 
 // Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+
+
+	// Transformations
+	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
+	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
+	void Rotate(CDC* pDC, float angle, bool rightMultiply);
+	void Mirror(CDC* pDC, bool mx, bool my, bool rightMultiply);
+	void TRT(CDC* pDC, POINT center, double angle, bool rightMultiply);
+	void TMT(CDC* pDC, POINT center, bool mx, bool my, bool rightMultiply);
+
+	//
+	void LoadIdentity(CDC* pDC);
+	void DrawInMemory(CDC* memDC);
+	void DrawGrid(CDC* pDC);
+	void DrawPicture(CDC* memDC);
+	void DrawPuzzlePiece(CDC* memDC, int i, int j);
+	void Grayscale(CBitmap* bits);
+
+	void MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, int i, int j);
+	CBitmap* GetBitmap(CDC* memDC, int i, int j);
+
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -52,33 +78,6 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
-private:
-	CSize windowSize;
-	CSize gridSize;
-	int gridCount;
-	bool grid;
-	DPOINT* joints;
-	int photoAngle;
-	int* branchAngles;
-	double jointRadius;
-
-	void DrawBackground(CDC* pDC, COLORREF color);
-	void DrawGrid(CDC* pDC, COLORREF color);
-	void DrawMyText(CDC* pDC, CString text, POINT from);
-	void DrawPot(CDC* pDC);
-	void DrawCactus(CDC* pDC);
-	void DrawJoint(CDC* pDC, int index);
-	void DrawBranch(CDC* pDC, int jointIndex, double sX, double sY, bool isDark);
-
-	// Transformations
-	void Translate(CDC* pDC, float dX, float dY, bool rightMultiply);
-	void Rotate(CDC* pDC, double angle, bool rightMultiply);
-	void Scale(CDC* pDC, float sX, float sY, bool rightMultiply);
-	void Reflect(CDC* pDC, float dX, float dY, bool rightMultiply);
-
-	void TRT(CDC* pDC, DPOINT center, double angle, bool rightMultiply);
-	void TST(CDC* pDC, DPOINT center, double sX, double sY, bool rightMultiply);
-
 public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 };
