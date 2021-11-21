@@ -15,6 +15,7 @@ typedef struct PuzzlePiece {
 	bool my;
 	int i;
 	int j;
+	POINT pos = { 0,0 };
 };
 
 class CIND16995View : public CView
