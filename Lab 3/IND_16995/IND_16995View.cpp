@@ -363,6 +363,7 @@ void CIND16995View::OnDraw(CDC* pDC)
 
 	CDC* memDC = new CDC();
 	memDC->CreateCompatibleDC(pDC);
+
 	memDC->SelectObject(&bitmap);
 
 	memDC->BitBlt(0, 0, client.Width(), client.Height(), pDC, 0, 0, SRCCOPY);
