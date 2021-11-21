@@ -49,6 +49,7 @@ public:
 	void Mirror(CDC* pDC, bool mx, bool my, bool rightMultiply);
 	void TRT(CDC* pDC, POINT center, double angle, bool rightMultiply);
 	void TMT(CDC* pDC, POINT center, bool mx, bool my, bool rightMultiply);
+	void Transform(CDC* pDC, POINT diff, POINT center, double angle, bool mx, bool my, bool rightMultiply);
 
 	//
 	void LoadIdentity(CDC* pDC);
@@ -58,8 +59,8 @@ public:
 	void DrawPuzzlePiece(CDC* memDC, int i, int j);
 	void Grayscale(CBitmap* bits);
 
-	void MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, int i, int j);
-	CBitmap* GetBitmap(CDC* memDC, int i, int j);
+	void MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName);
+	CBitmap* GetBitmap(CDC* memDC, CString& fileName);
 
 protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);

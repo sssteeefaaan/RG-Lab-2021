@@ -34,16 +34,16 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize = 500;
+	this->windowSize = 800;
 	this->gridNumb = 20;
 	this->gridSize = windowSize / gridNumb;
 	this->picSize = 10 * gridSize;
 
 	this->pieces = new PuzzlePiece[9]
 	{
-		{ L"resources\\8.dib", 127,	true,	false,	0,	0,	{ 17,  71 }	},	{ L"resources\\1.dib", -96, true, false, 0, 1, {-62, -40} },		{ L"resources\\2.dib", 106,	true,	false,	0,	2, { 42, 62 } },
-		{ L"resources\\9.dib", 89,	true,	false,	1,	0,	{ 57,  45 }	},	{ L"resources\\3.dib", 112, true, false, 1, 1, {35,   66} },		{ L"resources\\4.dib", 49,	true,	false,	1,	2, { 73, -2 } },
-		{ L"resources\\6.dib", 40,	true,	false,	2,	0,	{ 72, -14 }	},	{ L"resources\\5.dib", 117, true, false, 2, 1, {30,   68} },		{ L"resources\\7.dib", 141,	false,	true,	2,	2, { 0, -75 } }
+		{ L"resources\\8.dib", 127,	true,	false,	0,	0,	{ 30,  116 } },	{ L"resources\\1.dib", -96, true, false, 0, 1, { -100, -64 } },		{ L"resources\\2.dib", 106,	true,	false,	0,	2, { 67, 100 } },
+		{ L"resources\\9.dib", 89,	true,	false,	1,	0,	{ 95,   73 } },	{ L"resources\\3.dib", 112, true, false, 1, 1, { 58, 102 } },		{ L"resources\\4.dib", 49,	true,	false,	1,	2, { 119, -5 } },
+		{ L"resources\\6.dib", 40,	true,	false,	2,	0,	{ 119, -25 } },	{ L"resources\\5.dib", 117, true, false, 2, 1, { 48, 106 } },		{ L"resources\\7.dib", 141,	false,	true,	2,	2, { 0, -122 } }
 	};
 
 	this->selected = nullptr;
@@ -124,18 +124,31 @@ void CIND16995View::TMT(CDC* pDC, POINT center, bool mx, bool my, bool rightMult
 		Translate(pDC, -center.x, -center.y, false);
 	}
 }
-
+void CIND16995View::Transform(CDC* pDC, POINT diff, POINT center, double angle, bool mx, bool my, bool rightMultiply)
+{
+	if (rightMultiply)
+	{
+		Translate(pDC, -center.x, -center.y, true);
+		Mirror(pDC, mx, my, true);
+		Rotate(pDC, angle, true);
+		Translate(pDC, center.x + diff.x, center.y + diff.y, true);
+	}
+	else {
+		Translate(pDC, center.x + diff.x, center.y + diff.y, false);
+		Rotate(pDC, angle, false);
+		Mirror(pDC, mx, my, false);
+		Translate(pDC, -center.x, -center.y, false);
+	}
+}
 void CIND16995View::LoadIdentity(CDC* pDC)
 {
 	pDC->ModifyWorldTransform(nullptr, MWT_IDENTITY);
 }
 
-CBitmap* CIND16995View::GetBitmap(CDC* memDC, int i, int j)
+CBitmap* CIND16995View::GetBitmap(CDC* memDC, CString& fileName)
 {
-	PuzzlePiece* temp = &(this->pieces[i * 3 + j]);
-
 	DImage img;
-	img.Load(temp->file);
+	img.Load(fileName);
 
 	CDC* tempDC = new CDC();
 	tempDC->CreateCompatibleDC(memDC);
@@ -154,15 +167,13 @@ CBitmap* CIND16995View::GetBitmap(CDC* memDC, int i, int j)
 	tempDC->SelectObject(oldBM);
 	delete tempDC;
 
-	Grayscale(ret);
-
 	return ret;
 }
 
-void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, int i, int j)
+void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName)
 {
 	BITMAP bm;
-	subject = GetBitmap(memDC, i, j);
+	subject = GetBitmap(memDC, fileName);
 	subject->GetBitmap(&bm);
 
 	mask = new CBitmap();
@@ -180,9 +191,9 @@ void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mas
 	COLORREF oldBkColorSRC = src->SetBkColor(src->GetPixel(0, 0));
 	dst->BitBlt(0, 0, picSize, picSize, src, 0, 0, SRCCOPY);
 
-	COLORREF oldTXTColorSRC = src->SetTextColor(RGB(255, 255, 255));
-	src->SetBkColor(RGB(0, 0, 0));
-	src->BitBlt(0, 0, picSize, picSize, dst, 0, 0, SRCAND);
+	COLORREF oldTXTColorSRC = src->SetTextColor(RGB(0, 0, 0));
+	src->SetBkColor(RGB(255, 255, 255));
+	src->BitBlt(0, 0, picSize, picSize, dst, 0, 0, SRCPAINT);
 
 	src->SetTextColor(oldTXTColorSRC);
 	src->SetBkColor(oldBkColorSRC);
@@ -196,47 +207,45 @@ void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mas
 
 void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 {
-	PuzzlePiece* temp = &(this->pieces[i * 3 + j]);
+	PuzzlePiece* piece = &(this->pieces[i * 3 + j]);
+
 	CBitmap *subject = NULL, 
 		*mask = NULL;
-
-	MakeTransparent(memDC, subject, mask, i, j);
+	MakeTransparent(memDC, subject, mask, piece->file);
 
 	BITMAP bmp{};
 	subject->GetBitmap(&bmp);
 
-	CDC* newDC = new CDC();
-	newDC->CreateCompatibleDC(memDC);
-
 	int oldGM = memDC->SetGraphicsMode(GM_ADVANCED);
 	XFORM oldWT;
 	memDC->GetWorldTransform(&oldWT);
+	{
+		CDC* newDC = new CDC();
+		newDC->CreateCompatibleDC(memDC);
 
-	CRect pos;
-	pos.SetRect(temp->j * 6 * gridSize + gridSize,
-		temp->i * 6 * gridSize + gridSize,
-		(temp->j + 1) * 6 * gridSize + gridSize,
-		(temp->i + 1) * 6 * gridSize + gridSize);
+		CRect pos;
+		pos.SetRect(piece->j * 6 * gridSize,
+			piece->i * 6 * gridSize,
+			(piece->j + 1) * 6 * gridSize,
+			(piece->i + 1) * 6 * gridSize);
 
-	Translate(memDC, temp->pos.x, temp->pos.y, false);
-	TRT(memDC, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, temp->angle, false);
-	TMT(memDC, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, temp->mx, temp->my, false);
+		Transform(memDC, piece->pos, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, piece->angle, piece->mx, piece->my, false);
 
-	CBitmap* oldBM = newDC->SelectObject(mask);
-	memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCAND);
+		CBitmap* oldBM = newDC->SelectObject(mask);
+		memDC->SetBkColor(RGB(0, 0, 0));
+		memDC->SetTextColor(RGB(255, 255, 255));
+		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCPAINT);
 
-	newDC->SelectObject(subject);
-	memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCPAINT);
+		newDC->SelectObject(subject);
+		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCAND);
 
-	TMT(memDC, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, !temp->mx, !temp->my, false);
-	TRT(memDC, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, -temp->angle, false);
-	Translate(memDC, -temp->pos.x, -temp->pos.y, false);
+		Transform(memDC, { -piece->pos.x, -piece->pos.y }, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, -piece->angle, !piece->mx, !piece->my, false);
 
+		newDC->SelectObject(oldBM);
+		delete newDC;
+	}
 	memDC->SetWorldTransform(&oldWT);
 	memDC->SetGraphicsMode(oldGM);
-
-	newDC->SelectObject(oldBM);
-	delete newDC;
 
 	if(subject != nullptr)
 		delete subject;
@@ -249,29 +258,47 @@ void CIND16995View::Grayscale(CBitmap* bitmap)
 	BITMAP b;
 	bitmap->GetBitmap(&b);
 
-	u_char* bits = new u_char[b.bmWidthBytes * b.bmHeight];
+	unsigned char* bits = new unsigned char[b.bmWidthBytes * b.bmHeight];
 	bitmap->GetBitmapBits(b.bmWidthBytes * b.bmHeight, bits);
 
 	for (int i = 0; i < b.bmWidthBytes * b.bmHeight; i += 4)
 	{
-		u_char gr = (64 + (bits[i] + bits[i + 1] + bits[i + 2]) / 3);// % 256;
-		gr = gr > 255 ? 255 : gr;
-		bits[i] = gr;
-		bits[i + 1] = gr;
-		bits[i + 2] = gr;
+		bits[i] =
+			bits[i + 1] =
+			bits[i + 2] = min(255, 64 + (bits[i] + bits[i + 1] + bits[i + 2]) / 3);
+		bits[i + 3] = 0;
 	}
 
 	bitmap->SetBitmapBits(b.bmWidthBytes * b.bmHeight, bits);
-	delete[] bits;
+
+	if(bits)
+		delete[] bits;
+
+	bits = nullptr;
 }
 
 void CIND16995View::DrawPicture(CDC* memDC)
 {
+	CDC* newDC = new CDC();
+	newDC->CreateCompatibleDC(memDC);
+
+	CBitmap* newBMP = new CBitmap();
+	newBMP->CreateCompatibleBitmap(memDC, windowSize - 2 * gridSize, windowSize - 2 * gridSize);
+
+	CBitmap* oldBMP = newDC->SelectObject(newBMP);
+	newDC->BitBlt(0, 0, windowSize - 2 * gridSize, windowSize - 2 * gridSize, memDC, gridSize, gridSize, SRCCOPY);
+
 	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
-			DrawPuzzlePiece(memDC, i, j);
+			DrawPuzzlePiece(newDC, i, j);
 
-	// Grayscale(memDC->GetCurrentBitmap());
+	Grayscale(newBMP);
+	memDC->BitBlt(gridSize, gridSize, windowSize - 2 * gridSize, windowSize - 2 * gridSize, newDC, 0, 0, SRCCOPY);
+
+	newDC->SelectObject(oldBMP);
+
+	delete newBMP;
+	delete newDC;
 }
 
 void CIND16995View::DrawGrid(CDC* pDC)
@@ -401,15 +428,17 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		if(this->selected != nullptr){
 			int indTemp = this->selected->i * 3 + this->selected->j;
 
-			PuzzlePiece temp = this->pieces[ind];
-			this->pieces[ind] = this->pieces[indTemp];
-			this->pieces[indTemp] = temp;
+			PuzzlePiece temp1 = this->pieces[ind],
+				temp2 = this->pieces[indTemp];
 
-			this->pieces[indTemp].i = this->pieces[ind].i;
-			this->pieces[indTemp].j = this->pieces[ind].j;
+			temp1.i = this->pieces[indTemp].i;
+			temp1.j = this->pieces[indTemp].j;
 
-			this->pieces[ind].i = temp.i;
-			this->pieces[ind].j = temp.j;
+			temp2.i = this->pieces[ind].i;
+			temp2.j = this->pieces[ind].j;
+
+			this->pieces[ind] = temp2;
+			this->pieces[indTemp] = temp1;
 		}
 
 		this->selected = &this->pieces[ind];
@@ -449,6 +478,6 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		}
 	}
 	
-	Invalidate();
+	Invalidate(0);
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
 }
