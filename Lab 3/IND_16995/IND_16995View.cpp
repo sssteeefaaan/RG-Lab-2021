@@ -40,12 +40,13 @@ CIND16995View::CIND16995View() noexcept
 	this->gridNumb = 20;
 	this->gridSize = windowSize / gridNumb;
 	this->picSize = 10 * gridSize;
+	this->picRotate = 180;
 
 	this->pieces = new PuzzlePiece[9]
 	{
-		{ L"resources\\8.dib", 127,	true,	false,	0,	0,	{ 18,  74 } },	{ L"resources\\1.dib", -96, true, false, 0, 1, { -63, -39 } },		{ L"resources\\2.dib", 106,	true,	false,	0,	2, { 41, 61 } },
-		{ L"resources\\9.dib", 89,	true,	false,	1,	0,	{ 59,   47 } },	{ L"resources\\3.dib", 112, true, false, 1, 1, { 36, 65 } },		{ L"resources\\4.dib", 49,	true,	false,	1,	2, { 73, -4 } },
-		{ L"resources\\6.dib", 40,	true,	false,	2,	0,	{ 75, -14 } },	{ L"resources\\5.dib", 117, true, false, 2, 1, { 30, 67 } },		{ L"resources\\7.dib", 141,	false,	true,	2,	2, { -1, -77 } }
+		{ L"download (8).dib", 261,	true,	false,	0,	0,	{ -65,  -38 }, true },	{ L"download (5).dib", 84, true, false, 0, 1, { 62, 41 }, false },		{ L"download (3).dib", -12,	true,	false,	0,	2, { 33, -65 }, false  },
+		{ L"download (1).dib", 113,	true,	false,	1,	0,	{ 35,   64 }, false },	{ L"download (7).dib", 145, true, false, 1, 1, { -6, 74 }, false },		{ L"download (4).dib", 98,	false,	true,	1,	2, { -52, -55 }, false },
+		{ L"download (6).dib", 4,	false,	true,	2,	0,	{ -50, 51 }, false },	{ L"download (2).dib", 31, true, false, 2, 1, { 71, -27 }, false },		{ L"download.dib", 60,	false,	true,	2,	2, { -74, -14 }, false }
 	};
 
 	this->selected = nullptr;
@@ -238,10 +239,13 @@ void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 		memDC->SetTextColor(RGB(255, 255, 255));
 		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCPAINT);
 
+		if (piece->blueGray)
+			this->Bluescale(subject);
+		else
+			this->Grayscale(subject);
+
 		newDC->SelectObject(subject);
 		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCAND);
-
-		//Transform(memDC, { -piece->pos.x, -piece->pos.y }, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, -piece->angle, !piece->mx, !piece->my, false);
 
 		newDC->SelectObject(oldBM);
 		delete newDC;
@@ -279,6 +283,27 @@ void CIND16995View::Grayscale(CBitmap* bitmap)
 	bits = nullptr;
 }
 
+void CIND16995View::Bluescale(CBitmap* bitmap)
+{
+	BITMAP b;
+	bitmap->GetBitmap(&b);
+
+	BYTE* bits = new BYTE[b.bmWidthBytes * b.bmHeight];
+	bitmap->GetBitmapBits(b.bmWidthBytes * b.bmHeight, bits);
+
+	for (int i = 0; i < b.bmWidthBytes * b.bmHeight; i += 4)
+		bits[i + 1] =
+		bits[i + 2] =
+		bits[i + 3] = 0;
+
+	bitmap->SetBitmapBits(b.bmWidthBytes * b.bmHeight, bits);
+
+	if (bits)
+		delete[] bits;
+
+	bits = nullptr;
+}
+
 void CIND16995View::DrawPicture(CDC* memDC)
 {
 	CDC* newDC = new CDC();
@@ -294,7 +319,6 @@ void CIND16995View::DrawPicture(CDC* memDC)
 		for (int j = 0; j < 3; j++)
 			DrawPuzzlePiece(newDC, i, j);
 
-	this->Grayscale(newBMP);
 	memDC->BitBlt(gridSize, gridSize, windowSize - 2 * gridSize, windowSize - 2 * gridSize, newDC, 0, 0, SRCCOPY);
 
 	delete newDC->SelectObject(oldBMP);;
@@ -347,8 +371,16 @@ void CIND16995View::DrawInMemory(CDC* memDC)
 
 	CPoint oldVPOrg = memDC->SetViewportOrg((client.Width() - windowSize) / 2, (client.Height() - windowSize) / 2);
 
+	int oldGM = memDC->SetGraphicsMode(GM_ADVANCED);
+	XFORM oldWT{};
+	memDC->GetWorldTransform(&oldWT);
+	TRT(memDC, { windowSize / 2, windowSize / 2 }, picRotate, false);
+
 	DrawGrid(memDC);
 	DrawPicture(memDC);
+
+	memDC->SetWorldTransform(&oldWT);
+	memDC->SetGraphicsMode(oldGM);
 
 	memDC->SetViewportOrg(oldVPOrg);
 }
@@ -463,6 +495,9 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		case('E'):
 			this->selected->angle += step;
 			break;
+		case('B'):
+			this->selected->blueGray ^= true;
+			break;
 		case(VK_UP):
 			this->selected->pos.y -= step;
 			break;
@@ -476,6 +511,18 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			this->selected->pos.x += step;
 			break;
 		}
+	}
+
+	switch (nChar)
+	{
+	case('A'):
+		this->picRotate -= step;
+		break;
+	case('D'):
+		this->picRotate += step;
+		break;
+	default:
+		break;
 	}
 
 	Invalidate(0);

@@ -16,6 +16,7 @@ typedef struct PuzzlePiece {
 	int i;
 	int j;
 	POINT pos = { 0,0 };
+	bool blueGray;
 };
 
 class CIND16995View : public CView
@@ -33,6 +34,7 @@ private:
 	int gridNumb;
 	double gridSize;
 	double picSize;
+	int picRotate;
 	PuzzlePiece* pieces;
 	PuzzlePiece* selected;
 
@@ -58,6 +60,7 @@ public:
 	void DrawPicture(CDC* memDC);
 	void DrawPuzzlePiece(CDC* memDC, int i, int j);
 	void Grayscale(CBitmap* bits);
+	void Bluescale(CBitmap* bitmap);
 
 	void MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName);
 	CBitmap* GetBitmap(CDC* memDC, CString& fileName);
