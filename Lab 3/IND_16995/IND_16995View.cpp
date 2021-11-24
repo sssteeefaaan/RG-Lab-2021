@@ -28,6 +28,8 @@ BEGIN_MESSAGE_MAP(CIND16995View, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 	ON_WM_KEYDOWN()
+	//	ON_WM_ERASEBKGND()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 // CIND16995View construction/destruction
@@ -41,9 +43,9 @@ CIND16995View::CIND16995View() noexcept
 
 	this->pieces = new PuzzlePiece[9]
 	{
-		{ L"resources\\8.dib", 127,	true,	false,	0,	0,	{ 30,  116 } },	{ L"resources\\1.dib", -96, true, false, 0, 1, { -100, -64 } },		{ L"resources\\2.dib", 106,	true,	false,	0,	2, { 67, 100 } },
-		{ L"resources\\9.dib", 89,	true,	false,	1,	0,	{ 95,   73 } },	{ L"resources\\3.dib", 112, true, false, 1, 1, { 58, 102 } },		{ L"resources\\4.dib", 49,	true,	false,	1,	2, { 119, -5 } },
-		{ L"resources\\6.dib", 40,	true,	false,	2,	0,	{ 119, -25 } },	{ L"resources\\5.dib", 117, true, false, 2, 1, { 48, 106 } },		{ L"resources\\7.dib", 141,	false,	true,	2,	2, { 0, -122 } }
+		{ L"resources\\8.dib", 127,	true,	false,	0,	0,	{ 18,  74 } },	{ L"resources\\1.dib", -96, true, false, 0, 1, { -63, -39 } },		{ L"resources\\2.dib", 106,	true,	false,	0,	2, { 41, 61 } },
+		{ L"resources\\9.dib", 89,	true,	false,	1,	0,	{ 59,   47 } },	{ L"resources\\3.dib", 112, true, false, 1, 1, { 36, 65 } },		{ L"resources\\4.dib", 49,	true,	false,	1,	2, { 73, -4 } },
+		{ L"resources\\6.dib", 40,	true,	false,	2,	0,	{ 75, -14 } },	{ L"resources\\5.dib", 117, true, false, 2, 1, { 30, 67 } },		{ L"resources\\7.dib", 141,	false,	true,	2,	2, { -1, -77 } }
 	};
 
 	this->selected = nullptr;
@@ -209,8 +211,8 @@ void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 {
 	PuzzlePiece* piece = &(this->pieces[i * 3 + j]);
 
-	CBitmap *subject = NULL, 
-		*mask = NULL;
+	CBitmap* subject = NULL,
+		* mask = NULL;
 	MakeTransparent(memDC, subject, mask, piece->file);
 
 	BITMAP bmp{};
@@ -239,7 +241,7 @@ void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 		newDC->SelectObject(subject);
 		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCAND);
 
-		Transform(memDC, { -piece->pos.x, -piece->pos.y }, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, -piece->angle, !piece->mx, !piece->my, false);
+		//Transform(memDC, { -piece->pos.x, -piece->pos.y }, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, -piece->angle, !piece->mx, !piece->my, false);
 
 		newDC->SelectObject(oldBM);
 		delete newDC;
@@ -247,7 +249,7 @@ void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 	memDC->SetWorldTransform(&oldWT);
 	memDC->SetGraphicsMode(oldGM);
 
-	if(subject != nullptr)
+	if (subject != nullptr)
 		delete subject;
 	if (mask != nullptr)
 		delete mask;
@@ -258,7 +260,7 @@ void CIND16995View::Grayscale(CBitmap* bitmap)
 	BITMAP b;
 	bitmap->GetBitmap(&b);
 
-	unsigned char* bits = new unsigned char[b.bmWidthBytes * b.bmHeight];
+	BYTE* bits = new BYTE[b.bmWidthBytes * b.bmHeight];
 	bitmap->GetBitmapBits(b.bmWidthBytes * b.bmHeight, bits);
 
 	for (int i = 0; i < b.bmWidthBytes * b.bmHeight; i += 4)
@@ -271,7 +273,7 @@ void CIND16995View::Grayscale(CBitmap* bitmap)
 
 	bitmap->SetBitmapBits(b.bmWidthBytes * b.bmHeight, bits);
 
-	if(bits)
+	if (bits)
 		delete[] bits;
 
 	bits = nullptr;
@@ -286,18 +288,16 @@ void CIND16995View::DrawPicture(CDC* memDC)
 	newBMP->CreateCompatibleBitmap(memDC, windowSize - 2 * gridSize, windowSize - 2 * gridSize);
 
 	CBitmap* oldBMP = newDC->SelectObject(newBMP);
-	newDC->BitBlt(0, 0, windowSize - 2 * gridSize, windowSize - 2 * gridSize, memDC, gridSize, gridSize, SRCCOPY);
+	newDC->Rectangle(0, 0, windowSize - 2 * gridSize, windowSize - 2 * gridSize);
 
 	for (int i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
 			DrawPuzzlePiece(newDC, i, j);
 
-	Grayscale(newBMP);
+	this->Grayscale(newBMP);
 	memDC->BitBlt(gridSize, gridSize, windowSize - 2 * gridSize, windowSize - 2 * gridSize, newDC, 0, 0, SRCCOPY);
 
-	newDC->SelectObject(oldBMP);
-
-	delete newBMP;
+	delete newDC->SelectObject(oldBMP);;
 	delete newDC;
 }
 
@@ -364,9 +364,8 @@ void CIND16995View::OnDraw(CDC* pDC)
 	CDC* memDC = new CDC();
 	memDC->CreateCompatibleDC(pDC);
 
-	memDC->SelectObject(&bitmap);
-
-	memDC->BitBlt(0, 0, client.Width(), client.Height(), pDC, 0, 0, SRCCOPY);
+	CBitmap* oldBMP = memDC->SelectObject(&bitmap);
+	memDC->Rectangle(0, 0, client.Width(), client.Height());
 
 	DrawInMemory(memDC);
 
@@ -426,7 +425,7 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		int ind = (int)(nChar - '0') - 1;
 
-		if(this->selected != nullptr){
+		if (this->selected != nullptr) {
 			int indTemp = this->selected->i * 3 + this->selected->j;
 
 			PuzzlePiece temp1 = this->pieces[ind],
@@ -478,7 +477,15 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 			break;
 		}
 	}
-	
+
 	Invalidate(0);
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+BOOL CIND16995View::OnEraseBkgnd(CDC* pDC)
+{
+	// TODO: Add your message handler code here and/or call default
+	return false;
+	return CView::OnEraseBkgnd(pDC);
 }

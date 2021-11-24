@@ -24,7 +24,7 @@ protected: // create from serialization only
 	CIND16995View() noexcept;
 	DECLARE_DYNCREATE(CIND16995View)
 
-// Attributes
+	// Attributes
 public:
 	CIND16995Doc* GetDocument() const;
 
@@ -33,10 +33,10 @@ private:
 	int gridNumb;
 	double gridSize;
 	double picSize;
-	PuzzlePiece *pieces;
+	PuzzlePiece* pieces;
 	PuzzlePiece* selected;
 
-// Overrides
+	// Overrides
 public:
 	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
@@ -67,7 +67,7 @@ protected:
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
 
-// Implementation
+	// Implementation
 public:
 	virtual ~CIND16995View();
 #ifdef _DEBUG
@@ -77,15 +77,17 @@ public:
 
 protected:
 
-// Generated message map functions
+	// Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 };
 
 #ifndef _DEBUG  // debug version in IND_16995View.cpp
 inline CIND16995Doc* CIND16995View::GetDocument() const
-   { return reinterpret_cast<CIND16995Doc*>(m_pDocument); }
+{
+	return reinterpret_cast<CIND16995Doc*>(m_pDocument);
+}
 #endif
-

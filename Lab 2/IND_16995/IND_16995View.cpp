@@ -28,6 +28,7 @@ BEGIN_MESSAGE_MAP(CIND16995View, CView)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CView::OnFilePrintPreview)
 	ON_WM_KEYDOWN()
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 // CIND16995View construction/destruction
@@ -39,21 +40,21 @@ CIND16995View::CIND16995View() noexcept
 	this->gridSize = { int(this->windowSize.cx / this->gridCount + 0.5), int(this->windowSize.cy / this->gridCount + 0.5) };
 
 	this->grid = false;
-	
+
 	this->joints = new DPOINT[7]
 	{
-		{	double(10	* this->gridSize.cx),		double(17	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(14	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(11	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(8	* this->gridSize.cy) },
-		{	double(10	* this->gridSize.cx),		double(11	* this->gridSize.cy) }
+		{	double(10 * this->gridSize.cx),		double(17 * this->gridSize.cy) },
+		{	double(10 * this->gridSize.cx),		double(14 * this->gridSize.cy) },
+		{	double(10 * this->gridSize.cx),		double(11 * this->gridSize.cy) },
+		{	double(10 * this->gridSize.cx),		double(8 * this->gridSize.cy) },
+		{	double(10 * this->gridSize.cx),		double(8 * this->gridSize.cy) },
+		{	double(10 * this->gridSize.cx),		double(8 * this->gridSize.cy) },
+		{	double(10 * this->gridSize.cx),		double(11 * this->gridSize.cy) }
 	};
 	this->jointRadius = this->gridSize.cx / 2;
 
 	this->photoAngle = -90;
-	this->branchAngles = new int[11] { 0, 45, 45, 45, -45, 0, 0, -45, 0, -45, 0 };
+	this->branchAngles = new int[11]{ 0, 45, 45, 45, -45, 0, 0, -45, 0, -45, 0 };
 }
 
 CIND16995View::~CIND16995View()
@@ -102,10 +103,10 @@ void CIND16995View::DrawGrid(CDC* pDC, COLORREF color)
 		int tempY = (i >> 2) * this->gridSize.cy,
 			tempX = (i >> 2) * this->gridSize.cx;
 
-		points[i]		= {			  0,					tempY		};
-		points[i + 1]	= { this->windowSize.cx,			tempY		};
-		points[i + 2]	= {			tempX,					  0			};
-		points[i + 3]	= {			tempX,			this->windowSize.cy };
+		points[i] = { 0,					tempY };
+		points[i + 1] = { this->windowSize.cx,			tempY };
+		points[i + 2] = { tempX,					  0 };
+		points[i + 3] = { tempX,			this->windowSize.cy };
 	}
 
 	for (int i = 0; i < lengthsSize; i++)
@@ -147,12 +148,12 @@ void CIND16995View::DrawJoint(CDC* pDC, int index)
 {
 	CBrush* oldBrush = pDC->SelectObject(new CBrush(RGB(0, 180, 0)));
 
-	pDC->Ellipse(	
-					int(this->joints[index].x - this->jointRadius + 0.5),
-					int(this->joints[index].y - this->jointRadius + 0.5),
-					int(this->joints[index].x + this->jointRadius + 0.5),
-					int(this->joints[index].y + this->jointRadius + 0.5)
-				);
+	pDC->Ellipse(
+		int(this->joints[index].x - this->jointRadius + 0.5),
+		int(this->joints[index].y - this->jointRadius + 0.5),
+		int(this->joints[index].x + this->jointRadius + 0.5),
+		int(this->joints[index].y + this->jointRadius + 0.5)
+	);
 
 	delete pDC->SelectObject(oldBrush);
 }
@@ -265,7 +266,7 @@ void CIND16995View::TST(CDC* pDC, DPOINT center, double sX, double sY, bool righ
 	else
 	{
 		Translate(pDC, center.x, center.y, false);
-		Scale(pDC, sX , sY, false);
+		Scale(pDC, sX, sY, false);
 		Translate(pDC, -center.x, -center.y, false);
 	}
 }
@@ -297,10 +298,10 @@ void CIND16995View::DrawCactus(CDC* pDC)
 
 	TRT(pDC, joints[3], branchAngles[3], false);
 	DrawBranch(pDC, 3, 1.5, 3.0, true);
-	
+
 	TRT(pDC, joints[3], branchAngles[4] - branchAngles[3], false);
 	DrawBranch(pDC, 3, 1.5, 3.0, false);
-	
+
 	TRT(pDC, joints[3], -branchAngles[4], false);
 	DrawJoint(pDC, 3);
 
@@ -312,13 +313,13 @@ void CIND16995View::DrawCactus(CDC* pDC)
 
 	TRT(pDC, joints[4], -branchAngles[6], false);
 	DrawJoint(pDC, 4);
-	
+
 	TRT(pDC, joints[2], branchAngles[7] - branchAngles[5], false);
-	DrawBranch(pDC,  2, 0.8, 3.0, true);
+	DrawBranch(pDC, 2, 0.8, 3.0, true);
 
 	TRT(pDC, joints[5], branchAngles[8], false);
 	DrawBranch(pDC, 5, 2.2, 3.0, true);
-	
+
 	TRT(pDC, joints[5], -branchAngles[8], false);
 	DrawJoint(pDC, 5);
 
@@ -327,16 +328,16 @@ void CIND16995View::DrawCactus(CDC* pDC)
 
 	TRT(pDC, joints[1], branchAngles[9] - branchAngles[1], false);
 	DrawBranch(pDC, 1, 1.5, 3.0, true);
- 
+
 	TRT(pDC, joints[6], branchAngles[10], false);
 	DrawBranch(pDC, 6, 2.2, 3.0, true);
 
 	TRT(pDC, joints[6], -branchAngles[10], false);
 	DrawJoint(pDC, 6);
-		
+
 	TRT(pDC, joints[1], -branchAngles[9], false);
 	DrawJoint(pDC, 1);
-	
+
 	TRT(pDC, joints[0], -branchAngles[0], false);
 	DrawJoint(pDC, 0);
 
@@ -353,36 +354,52 @@ void CIND16995View::OnDraw(CDC* pDC)
 		int((rect.Width() + windowSize.cx) / 2 + 0.5),
 		int((rect.Height() + windowSize.cy) / 2 + 0.5)
 	);
-	
+
 	CRgn clip;
 	clip.CreateRectRgn(view.left, view.top, view.right, view.bottom);
-	pDC->GetClipBox(&rect);
-	pDC->SelectClipRgn(&clip);
 
-	CPoint viewportOrg = pDC->SetViewportOrg(view.TopLeft());
-	int oldGM = pDC->SetGraphicsMode(GM_ADVANCED);
+	CDC* memDC = new CDC();
+	memDC->CreateCompatibleDC(pDC);
 
-	DrawBackground(pDC, RGB(160, 210, 230));
+	CBitmap* memBM = new CBitmap();
+	memBM->CreateCompatibleBitmap(pDC, rect.Width(), rect.Height());
+
+	memDC->SelectObject(memBM);
+	memDC->Rectangle(0, 0, rect.Width(), rect.Height());
+	//memDC->BitBlt(0, 0, rect.Width(), rect.Height(), pDC, 0, 0, SRCCOPY);
+
+	memDC->GetClipBox(&rect);
+	memDC->SelectClipRgn(&clip);
+
+	CPoint viewportOrg = memDC->SetViewportOrg(view.TopLeft());
+	int oldGM = memDC->SetGraphicsMode(GM_ADVANCED);
+
+	DrawBackground(memDC, RGB(160, 210, 230));
 
 	XFORM oldWT;
 	pDC->GetWorldTransform(&oldWT);
 	pDC->ModifyWorldTransform(nullptr, MWT_IDENTITY);
 
-	TRT(pDC, { (double)windowSize.cx / 2, (double)windowSize.cy / 2 }, this->photoAngle, false);
+	TRT(memDC, { (double)windowSize.cx / 2, (double)windowSize.cy / 2 }, this->photoAngle, false);
 
-	DrawCactus(pDC);
-	DrawPot(pDC);
-	DrawMyText(pDC, (CString)L"16995 Stefan Aleksić", { int(gridSize.cx), int(gridSize.cy) });
+	DrawCactus(memDC);
+	DrawPot(memDC);
+	DrawMyText(memDC, (CString)L"16995 Stefan Aleksić", { int(gridSize.cx), int(gridSize.cy) });
 
-	pDC->SetWorldTransform(&oldWT);
+	memDC->SetWorldTransform(&oldWT);
 
 	if (grid)
-		DrawGrid(pDC, RGB(255, 255, 255));
+		DrawGrid(memDC, RGB(255, 255, 255));
 
-	pDC->SetGraphicsMode(oldGM);
-	pDC->SetViewportOrg(viewportOrg);
+	memDC->SetGraphicsMode(oldGM);
+	memDC->SetViewportOrg(viewportOrg);
 	clip.SetRectRgn(rect);
-	pDC->SelectClipRgn(&clip);
+	memDC->SelectClipRgn(&clip);
+
+	pDC->BitBlt(0, 0, rect.Width(), rect.Height(), memDC, 0, 0, SRCCOPY);
+
+	delete memBM;
+	delete memDC;
 }
 
 
@@ -480,4 +497,12 @@ void CIND16995View::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	Invalidate();
 	CView::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+
+BOOL CIND16995View::OnEraseBkgnd(CDC* pDC)
+{
+	return false;
+
+	return CView::OnEraseBkgnd(pDC);
 }
