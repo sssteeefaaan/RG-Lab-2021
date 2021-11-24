@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize = 800;
+	this->windowSize = 500;
 	this->gridNumb = 20;
 	this->gridSize = windowSize / gridNumb;
 	this->picSize = 10 * gridSize;
