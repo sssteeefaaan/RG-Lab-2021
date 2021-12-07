@@ -22,6 +22,12 @@ CGLRender::CGLRender()
 	this->showGrid = this->showAxes = true;
 
 	this->pieceAngle = 45;
+	this->sphereR = 0.25;
+	this->cylinderH = 1;
+	this->cylinderR = 0.35;
+	this->coneH = 1;
+	this->coneR = 0.35;
+	this->nSeg = 90;
 }
 
 CGLRender::~CGLRender()
@@ -147,6 +153,8 @@ void CGLRender::DrawScene(CDC* pDC)
 
 void CGLRender::DrawFigure(double angle)
 {
+	double heightCylinderSphereDif = this->cylinderH / 2 + this->sphereR,
+		heightConeSphereDif = this->coneH / 2 + this->sphereR;
 	glTranslatef(0, 0.5, 0);
 	DrawCylinder(1, 1.2, 1, 8, {0.64, 0.34, 0.11});
 
@@ -154,48 +162,48 @@ void CGLRender::DrawFigure(double angle)
 	DrawCylinder(0.5, 1.4, 1.4, 8, { 0.64, 0.34, 0.11 });
 
 	glTranslatef(0, 0.75, 0);
-	DrawCylinder(1, 0.3, 0.3, 90);
+	DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
-	glTranslatef(0, 0.7, 0);
-	DrawSphere(0.2, 90, 90);
+	glTranslatef(0, heightCylinderSphereDif, 0);
+	DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
 	glPushMatrix();
 	{
 		glRotatef(-45, 1, 0, 0);
 
-		glTranslatef(0, 0.7, 0);
-		DrawCylinder(1, 0.3, 0.3, 90);
+		glTranslatef(0, heightCylinderSphereDif, 0);
+		DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawSphere(0.2, 90, 90);
+		glTranslatef(0, heightCylinderSphereDif, 0);
+		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawCone(1, 0.3, 90);
+		glTranslatef(0, heightConeSphereDif, 0);
+		DrawCone(this->coneH, this->coneR, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawSphere(0.2, 90, 90);
+		glTranslatef(0, heightConeSphereDif, 0);
+		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 	}
 	glPopMatrix();
 
 	glPushMatrix();
 	{
-		glTranslatef(0, 0.7, 0);
-		DrawCylinder(1, 0.3, 0.3, 90);
+		glTranslatef(0, heightCylinderSphereDif, 0);
+		DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawSphere(0.2, 90, 90);
+		glTranslatef(0, heightCylinderSphereDif, 0);
+		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawCylinder(1, 0.3, 0.3, 90);
+		glTranslatef(0, heightCylinderSphereDif, 0);
+		DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawSphere(0.2, 90, 90);
+		glTranslatef(0, heightCylinderSphereDif, 0);
+		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawCone(1, 0.3, 90);
+		glTranslatef(0, heightConeSphereDif, 0);
+		DrawCone(this->coneH, this->coneR, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawSphere(0.2, 90, 90);
+		glTranslatef(0, heightConeSphereDif, 0);
+		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 	}
 	glPopMatrix();
 
@@ -203,21 +211,21 @@ void CGLRender::DrawFigure(double angle)
 	{
 		glRotatef(45, 1, 0, 0);
 
-		glTranslatef(0, 0.7, 0);
-		DrawCone(1, 0.3, 90);
+		glTranslatef(0, heightConeSphereDif, 0);
+		DrawCone(this->coneH, this->coneR, this->nSeg);
 
-		glTranslatef(0, 0.7, 0);
-		DrawSphere(0.2, 90, 90);
+		glTranslatef(0, heightConeSphereDif, 0);
+		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
 		glPushMatrix();
 		{
 			glRotatef(-45, 1, 0, 0);
 
-			glTranslatef(0, 0.7, 0);
-			DrawCylinder(1, 0.3, 0.3, 90);
+			glTranslatef(0, heightCylinderSphereDif, 0);
+			DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
-			glTranslatef(0, 0.7, 0);
-			DrawSphere(0.2, 90, 90);
+			glTranslatef(0, heightCylinderSphereDif, 0);
+			DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 		}
 		glPopMatrix();
 
@@ -225,31 +233,31 @@ void CGLRender::DrawFigure(double angle)
 		{
 			glRotatef(angle, 1, 0, 0);
 
-			glTranslatef(0, 0.7, 0);
-			DrawCylinder(1, 0.3, 0.3, 90, { 1,1,0 });
+			glTranslatef(0, heightCylinderSphereDif, 0);
+			DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg, { 1,1,0 });
 
-			glTranslatef(0, 0.7, 0);
-			DrawSphere(0.2, 90, 90);
+			glTranslatef(0, heightCylinderSphereDif, 0);
+			DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
 			glPushMatrix();
 			{
 				glRotatef(-45, 1, 0, 0);
 
-				glTranslatef(0, 0.7, 0);
-				DrawCylinder(1, 0.3, 0.3, 90);
+				glTranslatef(0, heightCylinderSphereDif, 0);
+				DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
-				glTranslatef(0, 0.7, 0);
-				DrawSphere(0.2, 90, 90);
+				glTranslatef(0, heightCylinderSphereDif, 0);
+				DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 			}
 			glPopMatrix();
 
 			glRotatef(45, 1, 0, 0);
 
-			glTranslatef(0, 0.7, 0);
-			DrawCone(1, 0.3, 90);
+			glTranslatef(0, heightConeSphereDif, 0);
+			DrawCone(this->coneH, this->coneR, this->nSeg);
 
-			glTranslatef(0, 0.7, 0);
-			DrawSphere(0.2, 90, 90);
+			glTranslatef(0, heightConeSphereDif, 0);
+			DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 		}
 		glPopMatrix();
 	}
@@ -469,9 +477,9 @@ void CGLRender::Zoom(bool out)
 	this->viewPosition[2] = this->viewR * cos(dwXY) * sin(dwXZ);
 }
 
-void CGLRender::DrawAxes(double width, double x, double y, double z, bool useNegative)
+void CGLRender::DrawAxes(double lenght, bool useNegative)
 {
-	glLineWidth(width);
+	glLineWidth(2);
 
 	long size = sizeof(float) * 36;
 	float *vertexes = (float*)malloc(size);
@@ -481,7 +489,7 @@ void CGLRender::DrawAxes(double width, double x, double y, double z, bool useNeg
 	{
 		int offset = i / 12;
 		vertexes[i + offset] = vertexes[i + 6 + offset] = 1;
-		vertexes[i + 3 + offset] = i < 12 ? x : i < 24 ? y : z;
+		vertexes[i + 3 + offset] = lenght;
 		vertexes[i + 9 + offset] = useNegative ? -vertexes[i + 3 + offset] : 0;
 	}
 	
