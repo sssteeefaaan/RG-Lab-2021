@@ -51,12 +51,12 @@ public:
 	void DrawScene(CDC* pDC);
 
 	void DrawFigure(double angle);
-	void DrawCylinder(double h = 1, double rTop = 1, double rBottom = -1, int nSeg = 90, COLOR3F color = { 0,.9,0 });
-	void DrawCone(double h = 1, double r = 1, int nSeg = 90, COLOR3F color = { 0,.9,0 });
-	void DrawSphere(double r = 1, int nSegAlpha = 90, int nSegBeta = 90, COLOR3F color = { 0,0.5,0 });
+	void DrawCylinder(double h = 1, double rTop = 1, double rBottom = -1, int nSeg = 90, COLOR3F color = { .47, 0, 0 });
+	void DrawCone(double h = 1, double r = 1, int nSeg = 90, COLOR3F color = { .47, 0, 0 });
+	void DrawSphere(double r = 1, int nSegAlpha = 90, int nSegBeta = 90, COLOR3F color = { 1, 1, 1 });
 
 	void DrawAxes(double lenght = 10, bool useNegative = false);
-	void DrawGrid(double width = 10, double height = 10, int nSegW = 10, int nSegH = 10, COLOR3F color = { 1,1,1 });
+	void DrawGrid(double width = 10, double height = 10, int nSegW = 10, int nSegH = 10, COLOR3F color = { 1, .6, 0 });
 
 	void RotateView(double dXY, double dXZ);
 	void Zoom(bool out);

@@ -87,7 +87,7 @@ void CGLRender::PrepareScene(CDC* pDC)
 	wglMakeCurrent(pDC->m_hDC, this->m_hrc);
 	// -------------------------------------------
 
-	glClearColor(128.0 / 255.0, 192.0 / 255.0, 255.0 / 255.0, 0.0);
+	glClearColor(0, .8, .0, .0);
 
 	// -------------------------------------------
 	wglMakeCurrent(NULL, NULL);
@@ -114,7 +114,7 @@ void CGLRender::Reshape(CDC* pDC, int w, int h)
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(40, (double)w / (double)h, 1, 100);
+	gluPerspective(30, (double)w / (double)h, 1, 100);
 	glMatrixMode(GL_MODELVIEW);
 
 	// -------------------------------------------
@@ -125,7 +125,7 @@ void CGLRender::DrawScene(CDC* pDC)
 {
 	wglMakeCurrent(pDC->m_hDC, this->m_hrc);
 	// -------------------------------------------
-	glClearColor(128.0 / 255.0, 192.0 / 255.0, 255.0 / 255.0, 0.0);
+	glClearColor(0, .8, .0, .0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -144,8 +144,6 @@ void CGLRender::DrawScene(CDC* pDC)
 
 	this->DrawFigure(this->pieceAngle);
 
-	glFlush();
-
 	// -------------------------------------------
 	SwapBuffers(pDC->m_hDC);
 	wglMakeCurrent(NULL, NULL);
@@ -156,17 +154,18 @@ void CGLRender::DrawFigure(double angle)
 	double heightCylinderSphereDif = this->cylinderH / 2 + this->sphereR,
 		heightConeSphereDif = this->coneH / 2 + this->sphereR;
 	glTranslatef(0, 0.5, 0);
-	DrawCylinder(1, 1.2, 1, 8, {0.64, 0.34, 0.11});
+	DrawCylinder(1, 1.2, 1, 8, { .5, .75, 1 });
 
 	glTranslatef(0, 0.75, 0);
-	DrawCylinder(0.5, 1.4, 1.4, 8, { 0.64, 0.34, 0.11 });
+	DrawCylinder(0.5, 1.4, 1.4, 8, { .5, .75, 1 });
 
-	glTranslatef(0, 0.75, 0);
-	DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
+	glTranslatef(0, .75, 0);
+	DrawCone(this->coneH, this->coneR, this->nSeg);
 
 	glTranslatef(0, heightCylinderSphereDif, 0);
 	DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
+	// Desna grana
 	glPushMatrix();
 	{
 		glRotatef(-45, 1, 0, 0);
@@ -176,29 +175,12 @@ void CGLRender::DrawFigure(double angle)
 
 		glTranslatef(0, heightCylinderSphereDif, 0);
 		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
-
-		glTranslatef(0, heightConeSphereDif, 0);
-		DrawCone(this->coneH, this->coneR, this->nSeg);
-
-		glTranslatef(0, heightConeSphereDif, 0);
-		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 	}
 	glPopMatrix();
 
+	// Srednja grana
 	glPushMatrix();
 	{
-		glTranslatef(0, heightCylinderSphereDif, 0);
-		DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
-
-		glTranslatef(0, heightCylinderSphereDif, 0);
-		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
-
-		glTranslatef(0, heightCylinderSphereDif, 0);
-		DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
-
-		glTranslatef(0, heightCylinderSphereDif, 0);
-		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
-
 		glTranslatef(0, heightConeSphereDif, 0);
 		DrawCone(this->coneH, this->coneR, this->nSeg);
 
@@ -207,16 +189,18 @@ void CGLRender::DrawFigure(double angle)
 	}
 	glPopMatrix();
 
+	// Leva grana
 	glPushMatrix();
 	{
 		glRotatef(45, 1, 0, 0);
 
 		glTranslatef(0, heightConeSphereDif, 0);
-		DrawCone(this->coneH, this->coneR, this->nSeg);
+		DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
 
 		glTranslatef(0, heightConeSphereDif, 0);
 		DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
+		// Na gore
 		glPushMatrix();
 		{
 			glRotatef(-45, 1, 0, 0);
@@ -226,22 +210,62 @@ void CGLRender::DrawFigure(double angle)
 
 			glTranslatef(0, heightCylinderSphereDif, 0);
 			DrawSphere(this->sphereR, this->nSeg, this->nSeg);
+
+			// Na desno
+			glPushMatrix();
+			{
+				glRotatef(-45, 1, 0, 0);
+
+				glTranslatef(0, heightConeSphereDif, 0);
+				DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
+
+				glTranslatef(0, heightConeSphereDif, 0);
+				DrawSphere(this->sphereR, this->nSeg, this->nSeg);
+			}
+			glPopMatrix();
+
+			// Na levo
+			glPushMatrix();
+			{
+				glRotatef(45, 1, 0, 0);
+
+				glTranslatef(0, heightConeSphereDif, 0);
+				DrawCone(this->coneH, this->coneR, this->nSeg);
+
+				glTranslatef(0, heightConeSphereDif, 0);
+				DrawSphere(this->sphereR, this->nSeg, this->nSeg);
+			}
+			glPopMatrix();
 		}
 		glPopMatrix();
 
+		// Na levo
 		glPushMatrix();
 		{
 			glRotatef(angle, 1, 0, 0);
 
 			glTranslatef(0, heightCylinderSphereDif, 0);
-			DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg, { 1,1,0 });
+			DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg, { 1, 1, 0 });
 
 			glTranslatef(0, heightCylinderSphereDif, 0);
 			DrawSphere(this->sphereR, this->nSeg, this->nSeg);
 
+			// Na desno
 			glPushMatrix();
 			{
 				glRotatef(-45, 1, 0, 0);
+
+				glTranslatef(0, heightCylinderSphereDif, 0);
+				DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
+
+				glTranslatef(0, heightCylinderSphereDif, 0);
+				DrawSphere(this->sphereR, this->nSeg, this->nSeg);
+			}
+			glPopMatrix();
+
+			// Pravo
+			glPushMatrix();
+			{
 
 				glTranslatef(0, heightCylinderSphereDif, 0);
 				DrawCylinder(this->cylinderH, this->cylinderR, this->cylinderR, this->nSeg);
