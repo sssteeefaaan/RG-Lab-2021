@@ -26,8 +26,7 @@ CGLRenderer::CGLRenderer()
 
 	this->room = new CGLMaterial(),
 		this->pedestal = new CGLMaterial(),
-		this->vaseDark = new CGLMaterial(),
-		this->vaseLight = new CGLMaterial(),
+		this->vase = new CGLMaterial(),
 		this->light = new CGLMaterial();
 }
 
@@ -45,16 +44,10 @@ CGLRenderer::~CGLRenderer()
 		this->pedestal = nullptr;
 	}
 
-	if (this->vaseDark)
+	if (this->vase)
 	{
-		delete this->vaseDark;
-		this->vaseDark = nullptr;
-	}
-
-	if (this->vaseLight)
-	{
-		delete this->vaseLight;
-		this->vaseLight = nullptr;
+		delete this->vase;
+		this->vase = nullptr;
 	}
 
 	if (this->light)
@@ -106,15 +99,7 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	this->pedestal->SetAmbient(.45, .45, .45, 1);
 	this->pedestal->SetDiffuse(.7, .7, .7, 1);
 
-	this->vaseLight->SetAmbient(.3, .3, .6, 1);
-	this->vaseLight->SetDiffuse(.4, .4, .9, 1);
-	this->vaseLight->SetSpecular(.3, .3, .8, 1);
-	this->vaseLight->SetShininess(40);
-
-	this->vaseDark->SetAmbient(.25, .25, .55, 1);
-	this->vaseDark->SetDiffuse(.3, .3, .8, 1);
-	this->vaseDark->SetSpecular(.2, .2, .7, 1);
-	this->vaseDark->SetShininess(40);
+	this->vase->SetShininess(40);
 
 	this->light->SetAmbient(.5, .5, .5, 1);
 	//this->light->SetDiffuse(1, 1, 1, 1);
@@ -221,7 +206,7 @@ void CGLRenderer::DrawScene(CDC* pDC)
 
 	DrawRoom(100, 100, 100, 100);
 	DrawPedestal(10, 8);
-	DrawVase(20, 28.5 / 14, 12.175, 15, 16);
+	DrawVase(20, 28.5 / 14, 12.175, 15, 16, this->showNormals);
 
 	if (this->showAxes)
 		DrawAxes(50);
@@ -353,7 +338,7 @@ void CGLRenderer::DrawPedestal(double base, int nStep)
 	}
 	glPopMatrix();
 }
-void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, int nStep)
+void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, int nStep, bool showNorms)
 {
 	double dR = rBottom - rTop;
 
@@ -363,71 +348,77 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 
 		glPushMatrix();
 		{
-			this->vaseLight->Select(GL_FRONT);
+			this->vase->SetAmbient(.3, .3, .6, 1);
+			this->vase->SetDiffuse(.4, .4, .9, 1);
+			this->vase->SetSpecular(.3, .3, .8, 1);
+			this->vase->Select(GL_FRONT);
 
 			rTop = rBottom - dR;
 			glTranslatef(0, h / 2, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom = rTop - dR;
 			rTop = rBottom;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rTop = rBottom + dR;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom = rTop + dR;
 			rTop = rBottom + dR;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rTop = rBottom - dR;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 		}
 		glPopMatrix();
 
 
 		glPushMatrix();
 		{
-			this->vaseDark->Select(GL_FRONT);
+			this->vase->SetAmbient(.25, .25, .55, 1);
+			this->vase->SetDiffuse(.3, .3, .8, 1);
+			this->vase->SetSpecular(.2, .2, .7, 1);
+			this->vase->Select(GL_FRONT);
 
 			rBottom = rTop;
 			rTop = rBottom - dR;
 			glTranslatef(0, 3.0 / 2.0 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom = rTop;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom = rTop + dR;
 			rTop = rBottom + dR;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom += 2*dR;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom = rTop - dR;
 			rTop = rBottom - dR;
 			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 		}
 		glPopMatrix();
 	}
@@ -449,7 +440,7 @@ void CGLRenderer::SetLighting()
 		float light_spot_direction1[] = { 0, 0, -1, 1 };
 		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_spot_direction1);
 
-		float light_position_red[] = { 0, 50, 49, 1 };
+		float light_position_red[] = { 0, 50, 48, 1 };
 		glLightfv(GL_LIGHT1, GL_POSITION, light_position_red);
 
 		this->light->SetEmission(1, 0, 0, 0);
@@ -474,7 +465,7 @@ void CGLRenderer::SetLighting()
 		float light_spot_direction2[] = { 0, 0, 1, 1 };
 		glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_spot_direction2);
 
-		float light_position_green[] = { 0, 50, -49, 1 };
+		float light_position_green[] = { 0, 50, -48, 1 };
 		glLightfv(GL_LIGHT2, GL_POSITION, light_position_green);
 
 		this->light->SetEmission(0, 1, 0, 0);
@@ -508,7 +499,7 @@ void CGLRenderer::SetLighting()
 		{
 			glVertex3f(0, 98, 0);
 			for(double i = 0; i < (2*M_PI + .25); i+=.25)
-				glVertex3f(2 * sin(i), 99, 2 * cos(i));
+				glVertex3f(2 * sin(i), 98, 2 * cos(i));
 		}
 		glEnd();
 
@@ -643,63 +634,105 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 		ny = r / L,
 		nr = h / L;
 
-	glBegin(GL_QUAD_STRIP);
-	{
-		for (double i = 0; i < (2 * M_PI + dW); i += dW)
-		{
-			double x = sin(i),
-				z = cos(i);
+	long size = ((nStep + 1) * 3) << 2 + 12;
+	float* vertNorm = new float[size];
+	int counter = 0;
+	
+	// Normala vrha
+	vertNorm[counter++] = 0;
+	vertNorm[counter++] = 1;
+	vertNorm[counter++] = 0;
 
-			glNormal3f(nr * x, ny, nr * z);
-			glVertex3f(rTopHalf * x, hHalf, rTopHalf * z);
-			glVertex3f(rBottomHalf * x, -hHalf, rBottomHalf * z);
-		}
+	// Centar gornje osnove
+	vertNorm[counter++] = 0;
+	vertNorm[counter++] = hHalf;
+	vertNorm[counter++] = 0;
+
+	// Normala dna
+	vertNorm[counter++] = 0;
+	vertNorm[counter++] = -1;
+	vertNorm[counter++] = 0;
+
+	// Centar donje osnove
+	vertNorm[counter++] = 0;
+	vertNorm[counter++] = -hHalf;
+	vertNorm[counter++] = 0;
+
+	for (double i = 0; i < (2 * M_PI + dW); i += dW)
+	{
+		// Osnova normale
+		vertNorm[counter++] = sin(i);
+		vertNorm[counter++] = 1;
+		vertNorm[counter++] = cos(i);
+
+		// Gornje teme
+		vertNorm[counter++] = rTopHalf * vertNorm[counter - 3];
+		vertNorm[counter++] = hHalf;
+		vertNorm[counter++] = rTopHalf * vertNorm[counter - 3];
+
+		// Normala za donje teme
+		vertNorm[counter++] = nr * vertNorm[counter - 6];
+		vertNorm[counter++] = ny;
+		vertNorm[counter++] = nr * vertNorm[counter - 6];
+
+		// Donje teme
+		vertNorm[counter++] = rBottomHalf * vertNorm[counter - 9];
+		vertNorm[counter++] = -hHalf;
+		vertNorm[counter++] = rBottomHalf * vertNorm[counter - 9];
+
+		// Normala za gornje teme == normala za donje teme
+		vertNorm[counter - 12] = vertNorm[counter - 6];
+		vertNorm[counter - 11] = vertNorm[counter - 5];
+		vertNorm[counter - 10] = vertNorm[counter - 4];
 	}
-	glEnd();
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[15]);
+	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[12]);
+
+	glDrawArrays(GL_QUAD_STRIP, 0, (counter - 2) / 6);
 
 	if (withBase)
 	{
-		glBegin(GL_TRIANGLE_FAN);
-		{
-			glNormal3f(0, 1, 0);
-			glVertex3f(0, 0, 0);
+		glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, &vertNorm[3]);
+		glNormalPointer(GL_FLOAT, sizeof(float) * 12, &vertNorm[0]);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, (counter - 1) / 6);
 
-			for (double i = 0; i < (2 * M_PI + dW); i += dW)
-				glVertex3f(rTopHalf * sin(i), hHalf, rTopHalf * cos(i));
-		}
-		glEnd();
-
-		glBegin(GL_TRIANGLE_FAN);
-		{
-			glNormal3f(0, -1, 0);
-			glVertex3f(0, 0, 0);
-
-			for (double i = 0; i < (2 * M_PI + dW); i += dW)
-				glVertex3f(rBottomHalf * sin(i), -hHalf, rBottomHalf * cos(i));
-		}
-		glEnd();
+		glVertexPointer(3, GL_FLOAT, sizeof(float) * 12, &vertNorm[9]);
+		glNormalPointer(GL_FLOAT, sizeof(float) * 12, &vertNorm[6]);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, (counter - 1) / 6);
 	}
+
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	if (showNormals)
 	{
 		glDisable(GL_LIGHTING);
 		glColor3f(0, 1, 0);
-		glBegin(GL_LINES);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		
+		for (int i = 12; i < counter; i += 6)
 		{
-			for (double i = 0; i < (2 * M_PI + dW); i += dW)
-			{
-				double x = sin(i),
-					z = cos(i);
-
-				glVertex3f(rTopHalf * x, hHalf, rTopHalf * z);
-				glVertex3f((rTopHalf + nr) * x, hHalf + ny, (rTopHalf + nr) * z);
-
-				glVertex3f(rBottomHalf * x, -hHalf, rBottomHalf * z);
-				glVertex3f((rBottomHalf + nr) * x, -hHalf + ny, (rBottomHalf + nr) * z);
-			}
+			vertNorm[i] += vertNorm[i + 3];
+			vertNorm[i + 1] += vertNorm[i + 4];
+			vertNorm[i + 2] += vertNorm[i + 5];
 		}
-		glEnd();
+		glVertexPointer(3, GL_FLOAT, 0, &vertNorm[12]);
+
+		glDrawArrays(GL_LINES, 0, (counter - 2) / 3);
+
+		glDisableClientState(GL_VERTEX_ARRAY);
 		glEnable(GL_LIGHTING);
+	}
+
+	if (vertNorm)
+	{
+		delete[] vertNorm;
+		vertNorm = nullptr;
 	}
 }
 void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int betaMax)
@@ -709,21 +742,45 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 		dAlpha = aMax / nStep1,
 		dBeta = bMax / nStep2;
 
-	glBegin(GL_QUAD_STRIP);
-	{
-		for (double i = 0; i < aMax; i += dAlpha)
-		{
-			for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
-			{
-				double x = cos(i) * cos(j),
-					y = sin(i),
-					z = cos(i) * sin(j);
+	long size = ((nStep2 + 1) * nStep2 * 3) << 2;
+	float* vertNorm = new float[size];
+	int counter = 0;
 
-				glNormal3f(x, y, z);
-				glVertex3f(r * cos(i + dAlpha) * cos(j), r * sin(i + dAlpha), r * cos(i + dAlpha) * sin(j));
-				glVertex3f(r * x, r * y, r * z);
-			}
+	for (double i = 0; i < aMax; i += dAlpha)
+	{
+		for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
+		{
+			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j);
+			vertNorm[counter++] = r * sin(i + dAlpha);
+			vertNorm[counter++] = r * cos(i + dAlpha) * sin(j);
+
+			vertNorm[counter++] = cos(i) * cos(j);
+			vertNorm[counter++] = sin(i);
+			vertNorm[counter++] = cos(i) * sin(j);
+
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+
+			vertNorm[counter++] = vertNorm[counter - 6];
+			vertNorm[counter++] = vertNorm[counter - 6];
+			vertNorm[counter++] = vertNorm[counter - 6];
 		}
 	}
-	glEnd();
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, sizeof(float)*6, &vertNorm[0]);
+	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
+	glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
+
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	if (vertNorm)
+	{
+		delete[] vertNorm;
+		vertNorm = nullptr;
+	}
 }

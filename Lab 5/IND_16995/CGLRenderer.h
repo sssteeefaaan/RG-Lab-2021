@@ -27,8 +27,7 @@ private:
 
 	CGLMaterial* room;
 	CGLMaterial* pedestal;
-	CGLMaterial* vaseDark;
-	CGLMaterial* vaseLight;
+	CGLMaterial* vase;
 	CGLMaterial* light;
 
 	bool redLight;
@@ -53,7 +52,7 @@ public:
 
 	void DrawRoom(double l, double w, double h, int nStep);
 	void DrawPedestal(double base = 10, int nStep = 8);
-	void DrawVase(double from, double h, double rTop, double rBottom, int nStep);
+	void DrawVase(double from, double h, double rTop, double rBottom, int nStep, bool showNorms = true);
 	void SetLighting();
 
 	void DrawCuboid(double l, double w, double h, int nStep, bool drawRoof = true, bool inverted = false);
