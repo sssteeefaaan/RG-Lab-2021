@@ -109,7 +109,7 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	// Globalno ambientno svetlo
 	GLfloat l_model_ambient[] = { .5, .5, .5, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 
 	// Direkciono svetlo
@@ -519,109 +519,97 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 		hStep = h / (double)nStep;
 
 	// Desna strana
-	glBegin(GL_QUADS);
+	glNormal3f(inverted ? -1 : 1, 0, 0);
+	for (double i = hHalf; i > -hHalf; i -= hStep)
 	{
-		glNormal3f(inverted ? -1 : 1, 0, 0);
-		for (double i = hHalf; i > -hHalf; i -= hStep)
+		glBegin(GL_QUAD_STRIP);
 		{
-			for (double j = wHalf; j > -wHalf; j -= wStep)
+			for (double j = wHalf; j > -(wHalf + wStep); j -= wStep)
 			{
 				glVertex3f(lHalf, i, j);
 				glVertex3f(lHalf, i - hStep, j);
-				glVertex3f(lHalf, i - hStep, j - wStep);
-				glVertex3f(lHalf, i, j - wStep);
-			}
-		}
-	}
-	glEnd();
-
-	// Leva strana
-	glBegin(GL_QUADS);
-	{
-		glNormal3f(inverted ? 1 : -1, 0, 0);
-		for (double i = hHalf; i > -hHalf; i -= hStep)
-		{
-			for (double j = -wHalf; j < wHalf; j += wStep)
-			{
-				glVertex3f(-lHalf, i, j);
-				glVertex3f(-lHalf, i - hStep, j);
-				glVertex3f(-lHalf, i - hStep, j + wStep);
-				glVertex3f(-lHalf, i, j + wStep);
-			}
-		}
-	}
-	glEnd();
-
-	// Gornja strana
-	if (drawRoof)
-	{
-		glBegin(GL_QUADS);
-		{
-			glNormal3f(0, inverted ? -1 : 1, 0);
-			for (double i = -wHalf; i < wHalf; i += wStep)
-			{
-				for (double j = -lHalf; j < lHalf; j += lStep)
-				{
-					glVertex3f(j, hHalf, i);
-					glVertex3f(j, hHalf, i + wStep);
-					glVertex3f(j + lStep, hHalf, i + wStep);
-					glVertex3f(j + lStep, hHalf, i);
-				}
 			}
 		}
 		glEnd();
 	}
 
-	// Donja strana
-	glBegin(GL_QUADS);
+	// Leva strana
+	glNormal3f(inverted ? 1 : -1, 0, 0);
+	for (double i = hHalf; i > -hHalf; i -= hStep)
 	{
-		glNormal3f(0, inverted ? 1 : -1, 0);
+		glBegin(GL_QUAD_STRIP);
+		{
+			for (double j = -wHalf; j < (wHalf + wStep); j += wStep)
+			{
+				glVertex3f(-lHalf, i, j);
+				glVertex3f(-lHalf, i - hStep, j);
+			}
+		}
+		glEnd();
+	}
+
+	if (drawRoof)
+	{
+		// Gornja strana
+		glNormal3f(0, inverted ? -1 : 1, 0);
 		for (double i = -wHalf; i < wHalf; i += wStep)
 		{
-			for (double j = -lHalf; j < lHalf; j += lStep)
+			glBegin(GL_QUAD_STRIP);
+			{
+				for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
+				{
+					glVertex3f(j, hHalf, i);
+					glVertex3f(j, hHalf, i + wStep);
+				}
+			}
+			glEnd();
+		}
+	}
+
+	// Donja strana
+	glNormal3f(0, inverted ? 1 : -1, 0);
+	for (double i = wHalf; i > -wHalf; i -= wStep)
+	{
+		glBegin(GL_QUAD_STRIP);
+		{
+			for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
 			{
 				glVertex3f(j, -hHalf, i);
-				glVertex3f(j, -hHalf, i + wStep);
-				glVertex3f(j + lStep, -hHalf, i + wStep);
-				glVertex3f(j + lStep, -hHalf, i);
+				glVertex3f(j, -hHalf, i - wStep);
 			}
 		}
+		glEnd();
 	}
-	glEnd();
 
 	// Prednja strana
-	glBegin(GL_QUADS);
+	glNormal3f(0, 0, inverted ? -1 : 1);
+	for (double i = hHalf; i > -hHalf; i -= hStep)
 	{
-		glNormal3f(0, 0, inverted ? -1 : 1);
-		for (double i = -lHalf; i < lHalf; i += lStep)
+		glBegin(GL_QUAD_STRIP);
 		{
-			for (double j = hHalf; j > -hHalf; j -= hStep)
+			for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
 			{
-				glVertex3f(i, j, wHalf);
-				glVertex3f(i, j - hStep, wHalf);
-				glVertex3f(i + lStep, j - hStep, wHalf);
-				glVertex3f(i + lStep, j, wHalf);
+				glVertex3f(j, i, wHalf);
+				glVertex3f(j, i - hStep, wHalf);
 			}
 		}
+		glEnd();
 	}
-	glEnd();
 
 	// Zadnja strana
-	glBegin(GL_QUADS);
+	glNormal3f(0, 0, inverted ? 1 : -1);
+	for (double i = hHalf; i > -hHalf; i -= hStep)
 	{
-		glNormal3f(0, 0, inverted ? 1 : -1);
-		for (double i = lHalf; i > -lHalf; i -= lStep)
+		glBegin(GL_QUAD_STRIP);
 		{
-			for (double j = hHalf; j > -hHalf; j -= hStep)
+			for (double j = lHalf; j > -(lHalf + lStep); j -= lStep)
 			{
-				glVertex3f(i, j, -wHalf);
-				glVertex3f(i, j - hStep, -wHalf);
-				glVertex3f(i - lStep, j - hStep, -wHalf);
-				glVertex3f(i - lStep, j, -wHalf);
+				glVertex3f(j, i, -wHalf);
+				glVertex3f(j, i - hStep, -wHalf);
 			}
 		}
+		glEnd();
 	}
-	glEnd();
 }
 void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep, bool withBase, bool showNormals)
 {
