@@ -99,30 +99,29 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	this->pedestal->SetAmbient(.45, .45, .45, 1);
 	this->pedestal->SetDiffuse(.7, .7, .7, 1);
 
-	this->vase->SetShininess(40);
+	this->vase->SetShininess(100);
 
-	this->light->SetAmbient(.5, .5, .5, 1);
-	//this->light->SetDiffuse(1, 1, 1, 1);
-	this->light->SetSpecular(1, 1, 1, 1);
-	this->light->SetShininess(50);
+	this->light->SetAmbient(.3, .3, .3, 1);
+	this->light->SetSpecular(.5, .5, .5, 1);
+	this->light->SetShininess(112);
 
 	// Globalno ambientno svetlo
-	GLfloat l_model_ambient[] = { .5, .5, .5, 1 };
+	GLfloat l_model_ambient[] = { .25, .25, .25, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 
 	// Direkciono svetlo
 	float light_ambient0[] = { .3, .3, .3, 1 };
-	float light_diffuse0[] = { 1, 1, 1, 1 };
-	float light_specular0[] = { 1, 1, 1, 1 };
+	float light_diffuse0[] = { .8, .8, .8, 1 };
+	float light_specular0[] = { .8, .8, .8, 1 };
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
 
 	// Crveno poziciono svetlo
-	float light_ambient1[] = { .3, 0, 0, 1 };
+	float light_ambient1[] = { .5, 0, 0, 1 };
 	float light_diffuse1[] = { 1, 0, 0, 1 };
 	float light_specular1[] = { 1, 0, 0, 1 };
 
@@ -131,14 +130,14 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
 
 	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, .1);
 
 	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0);
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
 
 	// Zeleno poziciono svetlo
-	float light_ambient2[] = { 0, .3, 0, 1 };
+	float light_ambient2[] = { 0, .5, 0, 1 };
 	float light_diffuse2[] = { 0, 1, 0, 1 };
 	float light_specular2[] = { 0, 1, 0, 1 };
 
@@ -147,14 +146,14 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
 
 	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 0);
+	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, .1);
 
 	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0);
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0);
 
 	// Plavo poziciono svetlo
-	float light_ambient3[] = { 0, 0, .2, 1 };
+	float light_ambient3[] = { 0, 0, .5, 1 };
 	float light_diffuse3[] = { 0, 0, 1, 1 };
 	float light_specular3[] = { 0, 0, 1, 1 };
 
@@ -163,7 +162,7 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
 
 	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 0);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, .1);
 
 	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0);
@@ -348,9 +347,9 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 
 		glPushMatrix();
 		{
-			this->vase->SetAmbient(.3, .3, .6, 1);
-			this->vase->SetDiffuse(.4, .4, .9, 1);
-			this->vase->SetSpecular(.3, .3, .8, 1);
+			this->vase->SetAmbient(.3, .3, .475, 1);
+			this->vase->SetDiffuse(.6, .6, .95, 1);
+			this->vase->SetSpecular(.6, .6, .95, 1);
 			this->vase->Select(GL_FRONT);
 
 			rTop = rBottom - dR;
@@ -386,9 +385,9 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 
 		glPushMatrix();
 		{
-			this->vase->SetAmbient(.25, .25, .55, 1);
-			this->vase->SetDiffuse(.3, .3, .8, 1);
-			this->vase->SetSpecular(.2, .2, .7, 1);
+			this->vase->SetAmbient(.225, .225, .475, 1);
+			this->vase->SetDiffuse(.45, .45, .95, 1);
+			this->vase->SetSpecular(.45, .45, .95, 1);
 			this->vase->Select(GL_FRONT);
 
 			rBottom = rTop;
@@ -443,8 +442,12 @@ void CGLRenderer::SetLighting()
 		float light_position_red[] = { 0, 50, 48, 1 };
 		glLightfv(GL_LIGHT1, GL_POSITION, light_position_red);
 
-		this->light->SetEmission(1, 0, 0, 0);
+		this->light->SetEmission(.8, 0, 0, 0);
+		this->light->SetDiffuse(.8, 0, 0, 0);
 		this->light->Select(GL_FRONT_AND_BACK);
+
+		glEnable(GL_LIGHT1);
+
 		glBegin(GL_TRIANGLE_FAN);
 		{
 			glVertex3f(0, 50, 48);
@@ -452,8 +455,6 @@ void CGLRenderer::SetLighting()
 				glVertex3f(2 * sin(i), 50 + 2 * cos(i), 48);
 		}
 		glEnd();
-
-		glEnable(GL_LIGHT1);
 	}
 	else
 		glDisable(GL_LIGHT1);
@@ -468,8 +469,12 @@ void CGLRenderer::SetLighting()
 		float light_position_green[] = { 0, 50, -48, 1 };
 		glLightfv(GL_LIGHT2, GL_POSITION, light_position_green);
 
-		this->light->SetEmission(0, 1, 0, 0);
+		this->light->SetEmission(0, .8, 0, 0);
+		this->light->SetDiffuse(0, .8, 0, 0);
 		this->light->Select(GL_FRONT_AND_BACK);
+
+		glEnable(GL_LIGHT2);
+
 		glBegin(GL_TRIANGLE_FAN);
 		{
 			glVertex3f(0, 50, -48);
@@ -477,8 +482,6 @@ void CGLRenderer::SetLighting()
 				glVertex3f(2 * sin(i), 50 + 2 * cos(i), -48);
 		}
 		glEnd();
-
-		glEnable(GL_LIGHT2);
 	}
 	else
 		glDisable(GL_LIGHT2);
@@ -493,8 +496,11 @@ void CGLRenderer::SetLighting()
 		float light_position_blue[] = { 0, 98, 0, 1 };
 		glLightfv(GL_LIGHT3, GL_POSITION, light_position_blue);
 
-		this->light->SetEmission(0, 0, 1, 0);
+		this->light->SetEmission(0, 0, .8, 0);
+		this->light->SetDiffuse(0, 0, .8, 0);
 		this->light->Select(GL_FRONT_AND_BACK);
+		glEnable(GL_LIGHT3);
+
 		glBegin(GL_TRIANGLE_FAN);
 		{
 			glVertex3f(0, 98, 0);
@@ -502,8 +508,6 @@ void CGLRenderer::SetLighting()
 				glVertex3f(2 * sin(i), 98, 2 * cos(i));
 		}
 		glEnd();
-
-		glEnable(GL_LIGHT3);
 	}
 	else
 		glDisable(GL_LIGHT3);
@@ -705,9 +709,9 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 		
 		for (int i = 12; i < counter; i += 6)
 		{
-			vertNorm[i] += vertNorm[i + 3];
-			vertNorm[i + 1] += vertNorm[i + 4];
-			vertNorm[i + 2] += vertNorm[i + 5];
+			vertNorm[i] = vertNorm[i] * 2 + vertNorm[i + 3];
+			vertNorm[i + 1] = vertNorm[i + 1] * 2 + vertNorm[i + 4];
+			vertNorm[i + 2] = vertNorm[i + 2] * 2 + vertNorm[i + 5];
 		}
 		glVertexPointer(3, GL_FLOAT, 0, &vertNorm[12]);
 
