@@ -56,10 +56,9 @@ public:
 	void DrawVase(double from, double h, double rTop, double rBottom, int nStep);
 	void SetLighting();
 
-	void DrawCuboid(double l, double w, double h, int nStep, bool inverted = false);
-	void DrawCone(double h, double r, int nStep);
+	void DrawCuboid(double l, double w, double h, int nStep, bool drawRoof = true, bool inverted = false);
 	void DrawCylinder(double h, double r1, double r2, int nStep, bool withBase = true, bool showNormals = false);
-	void DrawSphere(double r, int nStep1, int nStep2, int alphaMax = 180, int betaMax = 360);
+	void DrawSphere(double r, int nStep1, int nStep2, int alphaMax = 90, int betaMax = 360);
 
 protected:
 	HGLRC m_hrc;

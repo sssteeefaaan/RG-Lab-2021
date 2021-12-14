@@ -17,7 +17,10 @@ CGLRenderer::CGLRenderer()
 	this->upVector[2] = 0;
 
 	this->showAxes =
-		this->showNormals = true;
+		this->showNormals =
+		this->redLight =
+		this->greenLight =
+		this->blueLight = true;
 
 	this->CalculatePosition();
 
@@ -47,10 +50,17 @@ CGLRenderer::~CGLRenderer()
 		delete this->vaseDark;
 		this->vaseDark = nullptr;
 	}
+
 	if (this->vaseLight)
 	{
 		delete this->vaseLight;
 		this->vaseLight = nullptr;
+	}
+
+	if (this->light)
+	{
+		delete this->light;
+		this->light = nullptr;
 	}
 }
 
@@ -91,25 +101,88 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glEnable(GL_DEPTH_TEST);
 
 	this->room->SetAmbient(.4, .4, .4, 1);
-	this->room->SetDiffuse(.6, .6, .6, 1);
+	this->room->SetDiffuse(.65, .65, .65, 1);
 
 	this->pedestal->SetAmbient(.45, .45, .45, 1);
 	this->pedestal->SetDiffuse(.7, .7, .7, 1);
 
-	this->vaseLight->SetAmbient(.3, .3, .5, 1);
+	this->vaseLight->SetAmbient(.3, .3, .6, 1);
 	this->vaseLight->SetDiffuse(.4, .4, .9, 1);
-	this->vaseLight->SetSpecular(.4, .4, .9, 1);
-	this->vaseLight->SetShininess(45);
+	this->vaseLight->SetSpecular(.3, .3, .8, 1);
+	this->vaseLight->SetShininess(40);
 
-	this->vaseDark->SetAmbient(.2, .2, .4, 1);
+	this->vaseDark->SetAmbient(.25, .25, .55, 1);
 	this->vaseDark->SetDiffuse(.3, .3, .8, 1);
-	this->vaseDark->SetSpecular(.3, .3, .8, 1);
-	this->vaseDark->SetShininess(45);
+	this->vaseDark->SetSpecular(.2, .2, .7, 1);
+	this->vaseDark->SetShininess(40);
 
 	this->light->SetAmbient(.5, .5, .5, 1);
 	//this->light->SetDiffuse(1, 1, 1, 1);
 	this->light->SetSpecular(1, 1, 1, 1);
 	this->light->SetShininess(50);
+
+	// Globalno ambientno svetlo
+	GLfloat l_model_ambient[] = { .5, .5, .5, 1 };
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+
+	// Direkciono svetlo
+	float light_ambient0[] = { .3, .3, .3, 1 };
+	float light_diffuse0[] = { 1, 1, 1, 1 };
+	float light_specular0[] = { 1, 1, 1, 1 };
+
+	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
+
+	// Crveno poziciono svetlo
+	float light_ambient1[] = { .3, 0, 0, 1 };
+	float light_diffuse1[] = { 1, 0, 0, 1 };
+	float light_specular1[] = { 1, 0, 0, 1 };
+
+	glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient1);
+	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
+	glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
+
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0);
+
+	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1);
+	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0);
+	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
+
+	// Zeleno poziciono svetlo
+	float light_ambient2[] = { 0, .3, 0, 1 };
+	float light_diffuse2[] = { 0, 1, 0, 1 };
+	float light_specular2[] = { 0, 1, 0, 1 };
+
+	glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
+
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 20);
+	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 0);
+
+	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1);
+	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0);
+	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0);
+
+	// Plavo poziciono svetlo
+	float light_ambient3[] = { 0, 0, .2, 1 };
+	float light_diffuse3[] = { 0, 0, 1, 1 };
+	float light_specular3[] = { 0, 0, 1, 1 };
+
+	glLightfv(GL_LIGHT3, GL_AMBIENT, light_ambient3);
+	glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse3);
+	glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
+
+	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 20);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 0);
+
+	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1);
+	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0);
+	glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0);
 
 	//--------------------------------
 	wglMakeCurrent(NULL, NULL);
@@ -146,9 +219,9 @@ void CGLRenderer::DrawScene(CDC* pDC)
 
 	SetLighting();
 
-	DrawRoom(100, 100, 100, 50);
+	DrawRoom(100, 100, 100, 100);
 	DrawPedestal(10, 8);
-	DrawVase(22.5, 28 / 14, 12.175, 15, 16);
+	DrawVase(20, 28.5 / 14, 12.175, 15, 16);
 
 	if (this->showAxes)
 		DrawAxes(50);
@@ -163,8 +236,9 @@ void CGLRenderer::DestroyScene(CDC* pDC)
 {
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 	//--------------------------------
-
-
+	// 
+	// 
+	// 
 	//--------------------------------
 	wglMakeCurrent(NULL, NULL);
 
@@ -207,7 +281,7 @@ void CGLRenderer::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	switch (nChar)
 	{
 	case('W'):
-		this->viewAngleXY = min(this->viewAngleXY + step, 89.9);
+		this->viewAngleXY += step;
 		this->CalculatePosition();
 		break;
 	case('A'):
@@ -215,7 +289,7 @@ void CGLRenderer::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		this->CalculatePosition();
 		break;
 	case('S'):
-		this->viewAngleXY = max(this->viewAngleXY - step, -89.9);
+		this->viewAngleXY -= step;
 		this->CalculatePosition();
 		break;
 	case('D'):
@@ -248,8 +322,10 @@ void CGLRenderer::CalculatePosition()
 		dWXZ = this->viewAngleXZ * M_PI / 180;
 
 	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
-	this->viewPosition[1] = 50+ this->viewR * sin(dWXY);
+	this->viewPosition[1] = 50 + this->viewR * sin(dWXY);
 	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
+
+	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
 }
 
 void CGLRenderer::DrawRoom(double l, double w, double h, int nStep)
@@ -258,7 +334,7 @@ void CGLRenderer::DrawRoom(double l, double w, double h, int nStep)
 	glPushMatrix();
 	{
 		glTranslatef(0, h/2, 0);
-		DrawCuboid(l, w, h, nStep, true);
+		DrawCuboid(l, w, h, nStep, false, true);
 	}
 	glPopMatrix();
 }
@@ -267,13 +343,13 @@ void CGLRenderer::DrawPedestal(double base, int nStep)
 	this->pedestal->Select(GL_FRONT);
 	glPushMatrix();
 	{
-		DrawSphere(base, nStep * 3, nStep * 3);
+		DrawSphere(base / 1.1, nStep * 2, nStep * 4);
 
 		glTranslatef(0, base, 0);
-		DrawCylinder(2 * base, base, base, nStep, false);
+		DrawCylinder(base, base, base, nStep, false);
 
-		glTranslatef(0, base * (5 / 4), 0);
-		DrawCuboid(3 * base, 3 * base, base / 2, nStep, false);
+		glTranslatef(0, 3.0 / 4.0*base, 0);
+		DrawCuboid(3 * base, 3 * base, base / 2, nStep);
 	}
 	glPopMatrix();
 }
@@ -285,109 +361,83 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 	{
 		glTranslatef(0, from, 0);
 
-		this->vaseLight->Select(GL_FRONT);
-		rTop = rBottom - dR;
-		glTranslatef(0, h/2, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+		glPushMatrix();
+		{
+			this->vaseLight->Select(GL_FRONT);
 
-		this->vaseDark->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom - dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rTop = rBottom - dR;
+			glTranslatef(0, h / 2, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
-		this->vaseLight->Select(GL_FRONT);
-		rBottom = rTop;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rBottom = rTop - dR;
+			rTop = rBottom;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
-		this->vaseDark->Select(GL_FRONT);
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rTop = rBottom + dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
-		this->vaseLight->Select(GL_FRONT);
-		rTop = rBottom + dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rBottom = rTop + dR;
+			rTop = rBottom + dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
-		this->vaseDark->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom + dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
-		this->vaseLight->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom + dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
-
-		this->vaseDark->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom - dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
-
-		this->vaseLight->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom + dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
-
-		this->vaseDark->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom - dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
-
-		this->vaseLight->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom + dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
-
-		this->vaseDark->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom - dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rTop = rBottom - dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+		}
+		glPopMatrix();
 
 
+		glPushMatrix();
+		{
+			this->vaseDark->Select(GL_FRONT);
 
-		this->vaseLight->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom - dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rBottom = rTop;
+			rTop = rBottom - dR;
+			glTranslatef(0, 3.0 / 2.0 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
 
-		this->vaseDark->Select(GL_FRONT);
-		rBottom = rTop;
-		rTop = rBottom - dR;
-		glTranslatef(0, h, 0);
-		DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+			rBottom = rTop;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+
+			rBottom = rTop + dR;
+			rTop = rBottom + dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+
+			rBottom += 2*dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+
+			rBottom = rTop - dR;
+			rTop = rBottom - dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, this->showNormals);
+		}
+		glPopMatrix();
 	}
 	glPopMatrix();
 }
 void CGLRenderer::SetLighting()
 {
-	// Globalno ambientno svetlo
-	GLfloat l_model_ambient[] = { .5, .5, .5, 1 };
-	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
-
 	glEnable(GL_LIGHTING);
 
 	// Direkciono svetlo
-	float light_ambient0[] = { .3, .3, .3, 1 };
-	float light_diffuse0[] = { 1, 1, 1, 1 };
-	float light_specular0[] = { 1, 1, 1, 1 };
-
-	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
-
 	float light_position[] = { .5, 1, .75, 0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -395,21 +445,7 @@ void CGLRenderer::SetLighting()
 
 	if (this->redLight)
 	{
-		float light_ambient1[] = { .3, 0, 0, 1 };
-		float light_diffuse1[] = { 1, 0, 0, 1 };
-		float light_specular1[] = { 1, 0, 0, 1 };
-
-		glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient1);
-		glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
-		glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
-
-		glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
-		glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 0);
-
-		glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1);
-		glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0);
-		glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
-
+		// Crveno poziciono svetlo
 		float light_spot_direction1[] = { 0, 0, -1, 1 };
 		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_spot_direction1);
 
@@ -433,20 +469,7 @@ void CGLRenderer::SetLighting()
 
 	if (this->greenLight)
 	{
-		float light_ambient2[] = { 0, .3, 0, 1 };
-		float light_diffuse2[] = { 0, 1, 0, 1 };
-		float light_specular2[] = { 0, 1, 0, 1 };
-
-		glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
-		glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
-		glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
-
-		glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 20);
-		glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 0);
-
-		glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1);
-		glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0);
-		glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0);
+		// Zeleno poziciono svetlo
 
 		float light_spot_direction2[] = { 0, 0, 1, 1 };
 		glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_spot_direction2);
@@ -471,20 +494,7 @@ void CGLRenderer::SetLighting()
 
 	if (this->blueLight)
 	{
-		float light_ambient3[] = { 0, 0, .2, 1 };
-		float light_diffuse3[] = { 0, 0, 1, 1 };
-		float light_specular3[] = { 0, 0, 1, 1 };
-
-		glLightfv(GL_LIGHT3, GL_AMBIENT, light_ambient3);
-		glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse3);
-		glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
-
-		glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 20);
-		glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 0);
-
-		glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1);
-		glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0);
-		glLightf(GL_LIGHT3, GL_QUADRATIC_ATTENUATION, 0);
+		// Plavo poziciono svetlo
 
 		float light_spot_direction3[] = { 0, -1, 0, 1 };
 		glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_spot_direction3);
@@ -508,7 +518,7 @@ void CGLRenderer::SetLighting()
 		glDisable(GL_LIGHT3);
 }
 
-void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool inverted)
+void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawRoof, bool inverted)
 {
 	double lHalf = l / 2,
 		wHalf = w / 2,
@@ -517,93 +527,110 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool inver
 		wStep = w / (double)nStep,
 		hStep = h / (double)nStep;
 
-	glBegin(GL_QUAD_STRIP);
+	// Desna strana
+	glBegin(GL_QUADS);
 	{
 		glNormal3f(inverted ? -1 : 1, 0, 0);
 		for (double i = hHalf; i > -hHalf; i -= hStep)
 		{
-			for (double j = wHalf; j > -(wHalf + wStep); j -= wStep)
+			for (double j = wHalf; j > -wHalf; j -= wStep)
 			{
 				glVertex3f(lHalf, i, j);
 				glVertex3f(lHalf, i - hStep, j);
+				glVertex3f(lHalf, i - hStep, j - wStep);
+				glVertex3f(lHalf, i, j - wStep);
 			}
 		}
 	}
 	glEnd();
 
-	glBegin(GL_QUAD_STRIP);
+	// Leva strana
+	glBegin(GL_QUADS);
 	{
 		glNormal3f(inverted ? 1 : -1, 0, 0);
 		for (double i = hHalf; i > -hHalf; i -= hStep)
 		{
-			for (double j = -wHalf; j < (wHalf + wStep); j += wStep)
+			for (double j = -wHalf; j < wHalf; j += wStep)
 			{
 				glVertex3f(-lHalf, i, j);
 				glVertex3f(-lHalf, i - hStep, j);
+				glVertex3f(-lHalf, i - hStep, j + wStep);
+				glVertex3f(-lHalf, i, j + wStep);
 			}
 		}
 	}
 	glEnd();
 
-	glBegin(GL_QUAD_STRIP);
+	// Gornja strana
+	if (drawRoof)
 	{
-		glNormal3f(0, inverted ? -1 : 1, 0);
-		for (double i = -wHalf; i < wHalf; i += wStep)
+		glBegin(GL_QUADS);
 		{
-			for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
+			glNormal3f(0, inverted ? -1 : 1, 0);
+			for (double i = -wHalf; i < wHalf; i += wStep)
 			{
-				glVertex3f(j, hHalf, i);
-				glVertex3f(j, hHalf, i + wStep);
+				for (double j = -lHalf; j < lHalf; j += lStep)
+				{
+					glVertex3f(j, hHalf, i);
+					glVertex3f(j, hHalf, i + wStep);
+					glVertex3f(j + lStep, hHalf, i + wStep);
+					glVertex3f(j + lStep, hHalf, i);
+				}
 			}
 		}
+		glEnd();
 	}
-	glEnd();
 
-	glBegin(GL_QUAD_STRIP);
+	// Donja strana
+	glBegin(GL_QUADS);
 	{
 		glNormal3f(0, inverted ? 1 : -1, 0);
-		for (double i = wHalf; i > -wHalf; i -= wStep)
+		for (double i = -wHalf; i < wHalf; i += wStep)
 		{
-			for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
+			for (double j = -lHalf; j < lHalf; j += lStep)
 			{
 				glVertex3f(j, -hHalf, i);
-				glVertex3f(j, -hHalf, i - wStep);
+				glVertex3f(j, -hHalf, i + wStep);
+				glVertex3f(j + lStep, -hHalf, i + wStep);
+				glVertex3f(j + lStep, -hHalf, i);
 			}
 		}
 	}
 	glEnd();
 
-	glBegin(GL_QUAD_STRIP);
+	// Prednja strana
+	glBegin(GL_QUADS);
 	{
 		glNormal3f(0, 0, inverted ? -1 : 1);
 		for (double i = -lHalf; i < lHalf; i += lStep)
 		{
-			for (double j = hHalf; j > -(hHalf + hStep); j -= hStep)
+			for (double j = hHalf; j > -hHalf; j -= hStep)
 			{
 				glVertex3f(i, j, wHalf);
+				glVertex3f(i, j - hStep, wHalf);
+				glVertex3f(i + lStep, j - hStep, wHalf);
 				glVertex3f(i + lStep, j, wHalf);
 			}
 		}
 	}
 	glEnd();
 
-	glBegin(GL_QUAD_STRIP);
+	// Zadnja strana
+	glBegin(GL_QUADS);
 	{
 		glNormal3f(0, 0, inverted ? 1 : -1);
 		for (double i = lHalf; i > -lHalf; i -= lStep)
 		{
-			for (double j = hHalf; j > -(hHalf + hStep); j -= hStep)
+			for (double j = hHalf; j > -hHalf; j -= hStep)
 			{
-				glVertex3f(i - lStep, j, -wHalf);
 				glVertex3f(i, j, -wHalf);
+				glVertex3f(i, j - hStep, -wHalf);
+				glVertex3f(i - lStep, j - hStep, -wHalf);
+				glVertex3f(i - lStep, j, -wHalf);
 			}
 		}
 	}
 	glEnd();
-}
-void CGLRenderer::DrawCone(double h, double r, int nStep)
-{
-
 }
 void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep, bool withBase, bool showNormals)
 {
@@ -623,7 +650,7 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 			double x = sin(i),
 				z = cos(i);
 
-			glNormal3f(nr*x, ny, nr*z);
+			glNormal3f(nr * x, ny, nr * z);
 			glVertex3f(rTopHalf * x, hHalf, rTopHalf * z);
 			glVertex3f(rBottomHalf * x, -hHalf, rBottomHalf * z);
 		}
@@ -686,7 +713,7 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 	{
 		for (double i = 0; i < aMax; i += dAlpha)
 		{
-			for (double j = 0; j <= bMax; j += dBeta)
+			for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
 			{
 				double x = cos(i) * cos(j),
 					y = sin(i),
