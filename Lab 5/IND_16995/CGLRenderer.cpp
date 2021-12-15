@@ -9,7 +9,7 @@ CGLRenderer::CGLRenderer()
 	this->viewAngleXZ = 0;
 
 	this->lookingAt[0] = 0;
-	this->lookingAt[1] = 50;
+	this->lookingAt[1] = 0;
 	this->lookingAt[2] = 0;
 
 	this->upVector[0] = 0;
@@ -232,96 +232,17 @@ void CGLRenderer::DestroyScene(CDC* pDC)
 	}
 }
 
-void CGLRenderer::DrawAxes(double len)
-{
-	glDisable(GL_LIGHTING);
-	glBegin(GL_LINES);
-	{
-		glColor3f(1, 0, 0);
-		glVertex3f(0, 0, 0);
-		glVertex3f(len, 0, 0);
-
-		glColor3f(0, 1, 0);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, len, 0);
-
-		glColor3f(0, 0, 1);
-		glVertex3f(0, 0, 0);
-		glVertex3f(0, 0, len);
-	}
-	glEnd();
-	glEnable(GL_LIGHTING);
-}
-
-void CGLRenderer::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-{
-	this->viewR += zDelta < 0 ? 1 : -1;
-	this->CalculatePosition();
-}
-
-void CGLRenderer::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-	double step = 5;
-	switch (nChar)
-	{
-	case('W'):
-		this->viewAngleXY += step;
-		this->CalculatePosition();
-		break;
-	case('A'):
-		this->viewAngleXZ += step;
-		this->CalculatePosition();
-		break;
-	case('S'):
-		this->viewAngleXY -= step;
-		this->CalculatePosition();
-		break;
-	case('D'):
-		this->viewAngleXZ -= step;
-		this->CalculatePosition();
-		break;
-	case('C'):
-		this->showAxes = !this->showAxes;
-		break;
-	case('N'):
-		this->showNormals = !this->showNormals;
-		break;
-	case('R'):
-		this->redLight = !this->redLight;
-		break;
-	case('G'):
-		this->greenLight = !this->greenLight;
-		break;
-	case('B'):
-		this->blueLight = !this->blueLight;
-		break;
-	default:
-		break;
-	}
-}
-
-void CGLRenderer::CalculatePosition()
-{
-	double dWXY = this->viewAngleXY * M_PI / 180,
-		dWXZ = this->viewAngleXZ * M_PI / 180;
-
-	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
-	this->viewPosition[1] = 50 + this->viewR * sin(dWXY);
-	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
-
-	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
-}
-
 void CGLRenderer::DrawRoom(double l, double w, double h, int nStep)
 {
 	this->room->Select(GL_FRONT);
 	glPushMatrix();
 	{
-		glTranslatef(0, h/2, 0);
+		glTranslatef(0, h / 2, 0);
 		DrawCuboid(l, w, h, nStep, false, true);
 	}
 	glPopMatrix();
 }
+
 void CGLRenderer::DrawPedestal(double base, int nStep)
 {
 	this->pedestal->Select(GL_FRONT);
@@ -332,11 +253,12 @@ void CGLRenderer::DrawPedestal(double base, int nStep)
 		glTranslatef(0, base, 0);
 		DrawCylinder(base, base, base, nStep, false);
 
-		glTranslatef(0, 3.0 / 4.0*base, 0);
+		glTranslatef(0, 3.0 / 4.0 * base, 0);
 		DrawCuboid(3 * base, 3 * base, base / 2, nStep);
 	}
 	glPopMatrix();
 }
+
 void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, int nStep, bool showNorms)
 {
 	double dR = rBottom - rTop;
@@ -404,7 +326,7 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
-			rBottom += 2*dR;
+			rBottom += 2 * dR;
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
@@ -423,94 +345,38 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 	}
 	glPopMatrix();
 }
-void CGLRenderer::SetLighting()
+
+void CGLRenderer::DrawLight(double x, double y, double z, double r, double nx, double ny, double nz, int nSize)
 {
-	glEnable(GL_LIGHTING);
+	int ind;
+	float* vertexes = new float[(nSize + 2) * 3],
+		step = 2 * M_PI / nSize;
 
-	// Direkciono svetlo
-	float light_position[] = { .5, 1, .75, 0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	vertexes[0] = x;
+	vertexes[1] = y;
+	vertexes[2] = z;
+	ind = 3;
 
-	glEnable(GL_LIGHT0);
-
-	if (this->redLight)
+	for (double i = 0; i < (2 * M_PI + step); i += step)
 	{
-		// Crveno poziciono svetlo
-		float light_spot_direction1[] = { 0, 0, -1, 1 };
-		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_spot_direction1);
-
-		float light_position_red[] = { 0, 50, 48, 1 };
-		glLightfv(GL_LIGHT1, GL_POSITION, light_position_red);
-
-		this->light->SetEmission(.8, 0, 0, 0);
-		this->light->SetDiffuse(.8, 0, 0, 0);
-		this->light->Select(GL_FRONT_AND_BACK);
-
-		glEnable(GL_LIGHT1);
-
-		glBegin(GL_TRIANGLE_FAN);
-		{
-			glVertex3f(0, 50, 48);
-			for (double i = 0; i < (2 * M_PI + .25); i += .25)
-				glVertex3f(2 * sin(i), 50 + 2 * cos(i), 48);
-		}
-		glEnd();
+		vertexes[ind++] = x + (nx != 0 ? 0 : r * sin(i));
+		vertexes[ind++] = y + (ny != 0 ? 0 : r * cos(i));
+		vertexes[ind++] = z + (nz != 0 ? 0 : r * cos(i));
 	}
-	else
-		glDisable(GL_LIGHT1);
 
-	if (this->greenLight)
+	glNormal3f(nx, ny, nz);
+	glEnableClientState(GL_VERTEX_ARRAY);
 	{
-		// Zeleno poziciono svetlo
-
-		float light_spot_direction2[] = { 0, 0, 1, 1 };
-		glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_spot_direction2);
-
-		float light_position_green[] = { 0, 50, -48, 1 };
-		glLightfv(GL_LIGHT2, GL_POSITION, light_position_green);
-
-		this->light->SetEmission(0, .8, 0, 0);
-		this->light->SetDiffuse(0, .8, 0, 0);
-		this->light->Select(GL_FRONT_AND_BACK);
-
-		glEnable(GL_LIGHT2);
-
-		glBegin(GL_TRIANGLE_FAN);
-		{
-			glVertex3f(0, 50, -48);
-			for (double i = 0; i < (2 * M_PI + .25); i += .25)
-				glVertex3f(2 * sin(i), 50 + 2 * cos(i), -48);
-		}
-		glEnd();
+		glVertexPointer(3, GL_FLOAT, 0, vertexes);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, ind / 3);
 	}
-	else
-		glDisable(GL_LIGHT2);
+	glDisableClientState(GL_VERTEX_ARRAY);
 
-	if (this->blueLight)
+	if (vertexes)
 	{
-		// Plavo poziciono svetlo
-
-		float light_spot_direction3[] = { 0, -1, 0, 1 };
-		glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_spot_direction3);
-
-		float light_position_blue[] = { 0, 98, 0, 1 };
-		glLightfv(GL_LIGHT3, GL_POSITION, light_position_blue);
-
-		this->light->SetEmission(0, 0, .8, 0);
-		this->light->SetDiffuse(0, 0, .8, 0);
-		this->light->Select(GL_FRONT_AND_BACK);
-		glEnable(GL_LIGHT3);
-
-		glBegin(GL_TRIANGLE_FAN);
-		{
-			glVertex3f(0, 98, 0);
-			for(double i = 0; i < (2*M_PI + .25); i+=.25)
-				glVertex3f(2 * sin(i), 98, 2 * cos(i));
-		}
-		glEnd();
+		delete[] vertexes;
+		vertexes = nullptr;
 	}
-	else
-		glDisable(GL_LIGHT3);
 }
 
 void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawRoof, bool inverted)
@@ -615,6 +481,7 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 		glEnd();
 	}
 }
+
 void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep, bool withBase, bool showNormals)
 {
 	double dW = M_PI / (180.0 / (double)nStep),
@@ -629,7 +496,7 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 	long size = ((nStep + 1) * 3) << 2 + 12;
 	float* vertNorm = new float[size];
 	int counter = 0;
-	
+
 	// Normala vrha
 	vertNorm[counter++] = 0;
 	vertNorm[counter++] = 1;
@@ -706,12 +573,12 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 		glColor3f(0, 1, 0);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
-		
+
 		for (int i = 12; i < counter; i += 6)
 		{
-			vertNorm[i] = vertNorm[i] * 2 + vertNorm[i + 3];
-			vertNorm[i + 1] = vertNorm[i + 1] * 2 + vertNorm[i + 4];
-			vertNorm[i + 2] = vertNorm[i + 2] * 2 + vertNorm[i + 5];
+			vertNorm[i] = vertNorm[i] * h + vertNorm[i + 3];
+			vertNorm[i + 1] = vertNorm[i + 1] * h + vertNorm[i + 4];
+			vertNorm[i + 2] = vertNorm[i + 2] * h + vertNorm[i + 5];
 		}
 		glVertexPointer(3, GL_FLOAT, 0, &vertNorm[12]);
 
@@ -727,28 +594,45 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 		vertNorm = nullptr;
 	}
 }
+
 void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int betaMax)
 {
-	double aMax = alphaMax * M_PI / 180,
+	float aMax = alphaMax * M_PI / 180,
 		bMax = betaMax * M_PI / 180,
 		dAlpha = aMax / nStep1,
 		dBeta = bMax / nStep2;
 
-	long size = ((nStep2 + 1) * nStep2 * 3) << 2;
+	long size = (nStep1 * nStep2 * 3) << 4;
 	float* vertNorm = new float[size];
 	int counter = 0;
 
-	for (double i = 0; i < aMax; i += dAlpha)
+	for (float i = 0; i < aMax; i += dAlpha)
 	{
-		for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
+		for (float j = 0; j < bMax; j += dBeta)
 		{
-			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j);
+			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j + dBeta);
 			vertNorm[counter++] = r * sin(i + dAlpha);
-			vertNorm[counter++] = r * cos(i + dAlpha) * sin(j);
+			vertNorm[counter++] = r * cos(i + dAlpha) * sin(j + dBeta);
 
-			vertNorm[counter++] = cos(i) * cos(j);
+			vertNorm[counter++] = cos(i) * cos(j + dBeta);
 			vertNorm[counter++] = sin(i);
-			vertNorm[counter++] = cos(i) * sin(j);
+			vertNorm[counter++] = cos(i) * sin(j + dBeta);
+
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+
+			vertNorm[counter++] = vertNorm[counter - 6];
+			vertNorm[counter++] = vertNorm[counter - 6];
+			vertNorm[counter++] = vertNorm[counter - 6];
+
+			vertNorm[counter++] = r * cos(i) * cos(j);
+			vertNorm[counter++] = r * sin(i);
+			vertNorm[counter++] = r * cos(i) * sin(j);
+
+			vertNorm[counter++] = cos(i + dAlpha) * cos(j);
+			vertNorm[counter++] = sin(i + dAlpha);
+			vertNorm[counter++] = cos(i + dAlpha) * sin(j);
 
 			vertNorm[counter++] = r * vertNorm[counter - 3];
 			vertNorm[counter++] = r * vertNorm[counter - 3];
@@ -763,9 +647,9 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 
-	glVertexPointer(3, GL_FLOAT, sizeof(float)*6, &vertNorm[0]);
+	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
 	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
-	glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
+	glDrawArrays(GL_QUADS, 0, counter / 6);
 
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -774,5 +658,158 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 	{
 		delete[] vertNorm;
 		vertNorm = nullptr;
+	}
+}
+
+void CGLRenderer::DrawAxes(double len)
+{
+	glDisable(GL_LIGHTING);
+	glBegin(GL_LINES);
+	{
+		glColor3f(1, 0, 0);
+		glVertex3f(0, 0, 0);
+		glVertex3f(len, 0, 0);
+
+		glColor3f(0, 1, 0);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, len, 0);
+
+		glColor3f(0, 0, 1);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 0, len);
+	}
+	glEnd();
+	glEnable(GL_LIGHTING);
+}
+
+void CGLRenderer::CalculatePosition()
+{
+	double dWXY = this->viewAngleXY * M_PI / 180,
+		dWXZ = this->viewAngleXZ * M_PI / 180;
+
+	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
+	this->viewPosition[1] = 0 + this->viewR * sin(dWXY);
+	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
+
+	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
+}
+
+void CGLRenderer::SetLighting()
+{
+	glEnable(GL_LIGHTING);
+
+	// Direkciono svetlo
+	float light_position[] = { .5, 1, .75, 0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glEnable(GL_LIGHT0);
+
+	if (this->redLight)
+	{
+		// Crveno poziciono svetlo
+
+		float light_spot_direction1[] = { 0, 0, -1, 1 };
+		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_spot_direction1);
+
+		float light_position_red[] = { 0, 50, 48, 1 };
+		glLightfv(GL_LIGHT1, GL_POSITION, light_position_red);
+
+		this->light->SetEmission(.8, 0, 0, 0);
+		this->light->SetDiffuse(.8, 0, 0, 0);
+		this->light->Select(GL_FRONT_AND_BACK);
+
+		glEnable(GL_LIGHT1);
+
+		DrawLight(0, 50, 48, 2, 0, 0, -1);
+	}
+	else
+		glDisable(GL_LIGHT1);
+
+	if (this->greenLight)
+	{
+		// Zeleno poziciono svetlo
+
+		float light_spot_direction2[] = { 0, 0, 1, 1 };
+		glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_spot_direction2);
+
+		float light_position_green[] = { 0, 50, -48, 1 };
+		glLightfv(GL_LIGHT2, GL_POSITION, light_position_green);
+
+		this->light->SetEmission(0, .8, 0, 0);
+		this->light->SetDiffuse(0, .8, 0, 0);
+		this->light->Select(GL_FRONT_AND_BACK);
+
+		glEnable(GL_LIGHT2);
+
+		DrawLight(0, 50, -48, 2, 0, 0, 1);
+	}
+	else
+		glDisable(GL_LIGHT2);
+
+	if (this->blueLight)
+	{
+		// Plavo poziciono svetlo
+
+		float light_spot_direction3[] = { 0, -1, 0, 1 };
+		glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_spot_direction3);
+
+		float light_position_blue[] = { 0, 98, 0, 1 };
+		glLightfv(GL_LIGHT3, GL_POSITION, light_position_blue);
+
+		this->light->SetEmission(0, 0, .8, 0);
+		this->light->SetDiffuse(0, 0, .8, 0);
+		this->light->Select(GL_FRONT_AND_BACK);
+		glEnable(GL_LIGHT3);
+
+		DrawLight(0, 98, 0, 2, 0, -1, 0);
+	}
+	else
+		glDisable(GL_LIGHT3);
+}
+
+void CGLRenderer::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+{
+	this->viewR += zDelta < 0 ? 1 : -1;
+	this->CalculatePosition();
+}
+
+void CGLRenderer::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	double step = 5;
+	switch (nChar)
+	{
+	case('W'):
+		this->viewAngleXY += step;
+		this->CalculatePosition();
+		break;
+	case('A'):
+		this->viewAngleXZ += step;
+		this->CalculatePosition();
+		break;
+	case('S'):
+		this->viewAngleXY -= step;
+		this->CalculatePosition();
+		break;
+	case('D'):
+		this->viewAngleXZ -= step;
+		this->CalculatePosition();
+		break;
+	case('C'):
+		this->showAxes = !this->showAxes;
+		break;
+	case('N'):
+		this->showNormals = !this->showNormals;
+		break;
+	case('R'):
+		this->redLight = !this->redLight;
+		break;
+	case('G'):
+		this->greenLight = !this->greenLight;
+		break;
+	case('B'):
+		this->blueLight = !this->blueLight;
+		break;
+	default:
+		break;
 	}
 }

@@ -45,7 +45,7 @@ public:
 	void DrawScene(CDC* pDC);
 	void DestroyScene(CDC* pDC);
 
-	void DrawAxes(double len=50);
+	void DrawAxes(double len = 50);
 
 	void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -53,6 +53,7 @@ public:
 	void DrawRoom(double l, double w, double h, int nStep);
 	void DrawPedestal(double base = 10, int nStep = 8);
 	void DrawVase(double from, double h, double rTop, double rBottom, int nStep, bool showNorms = true);
+	void DrawLight(double x, double y, double z, double r, double nx, double ny, double nz, int nSize = 32);
 	void SetLighting();
 
 	void DrawCuboid(double l, double w, double h, int nStep, bool drawRoof = true, bool inverted = false);
