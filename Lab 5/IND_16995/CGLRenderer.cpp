@@ -9,7 +9,7 @@ CGLRenderer::CGLRenderer()
 	this->viewAngleXZ = 0;
 
 	this->lookingAt[0] = 0;
-	this->lookingAt[1] = 0;
+	this->lookingAt[1] = 50;
 	this->lookingAt[2] = 0;
 
 	this->upVector[0] = 0;
@@ -190,7 +190,6 @@ void CGLRenderer::DrawScene(CDC* pDC)
 {
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 	//--------------------------------
-	glClearColor(0, 0, 0, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
@@ -272,7 +271,7 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 			this->vase->SetAmbient(.3, .3, .475, 1);
 			this->vase->SetDiffuse(.6, .6, .95, 1);
 			this->vase->SetSpecular(.6, .6, .95, 1);
-			this->vase->Select(GL_FRONT);
+			this->vase->Select(GL_FRONT_AND_BACK);
 
 			rTop = rBottom - dR;
 			glTranslatef(0, h / 2, 0);
@@ -310,7 +309,7 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 			this->vase->SetAmbient(.225, .225, .475, 1);
 			this->vase->SetDiffuse(.45, .45, .95, 1);
 			this->vase->SetSpecular(.45, .45, .95, 1);
-			this->vase->Select(GL_FRONT);
+			this->vase->Select(GL_FRONT_AND_BACK);
 
 			rBottom = rTop;
 			rTop = rBottom - dR;
@@ -688,7 +687,7 @@ void CGLRenderer::CalculatePosition()
 		dWXZ = this->viewAngleXZ * M_PI / 180;
 
 	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
-	this->viewPosition[1] = 0 + this->viewR * sin(dWXY);
+	this->viewPosition[1] = 50 + this->viewR * sin(dWXY);
 	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
 
 	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
