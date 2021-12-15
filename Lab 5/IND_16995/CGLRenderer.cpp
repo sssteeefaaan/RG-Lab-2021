@@ -9,7 +9,7 @@ CGLRenderer::CGLRenderer()
 	this->viewAngleXZ = 0;
 
 	this->lookingAt[0] = 0;
-	this->lookingAt[1] = 50;
+	this->lookingAt[1] = 25;
 	this->lookingAt[2] = 0;
 
 	this->upVector[0] = 0;
@@ -18,9 +18,9 @@ CGLRenderer::CGLRenderer()
 
 	this->showAxes =
 		this->showNormals =
+		this->yellowLight =
 		this->redLight =
-		this->greenLight =
-		this->blueLight = true;
+		this->purpleLight = true;
 
 	this->CalculatePosition();
 
@@ -121,26 +121,26 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
 
-	// Crveno poziciono svetlo
-	float light_ambient1[] = { .25, 0, 0, 1 };
-	float light_diffuse1[] = { 1, 0, 0, 1 };
-	float light_specular1[] = { .2, 0, 0, 1 };
+	// Zuto poziciono svetlo
+	float light_ambient1[] = { .25, .25, 0, 1 };
+	float light_diffuse1[] = { 1, 1, 0, 1 };
+	float light_specular1[] = { .35, .35, 0, 1 };
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, light_specular1);
 
-	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, .1);
+	glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 25);
+	glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2);
 
 	glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0);
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
 
-	// Zeleno poziciono svetlo
-	float light_ambient2[] = { 0, .25, 0, 1 };
-	float light_diffuse2[] = { 0, 1, 0, 1 };
-	float light_specular2[] = { 0, .2, 0, 1 };
+	// Crveno poziciono svetlo
+	float light_ambient2[] = { .35, 0, 0, 1 };
+	float light_diffuse2[] = { 1, 0, 0, 1 };
+	float light_specular2[] = { .35, 0, 0, 1 };
 
 	glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
@@ -153,17 +153,17 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0);
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0);
 
-	// Plavo poziciono svetlo
-	float light_ambient3[] = { 0, 0, .25, 1 };
-	float light_diffuse3[] = { 0, 0, 1, 1 };
-	float light_specular3[] = { 0, 0, .2, 1 };
+	// Ljubicasto poziciono svetlo
+	float light_ambient3[] = { .35, 0, .35, 1 };
+	float light_diffuse3[] = { 1, 0, 1, 1 };
+	float light_specular3[] = { .35, 0, .35, 1 };
 
 	glLightfv(GL_LIGHT3, GL_AMBIENT, light_ambient3);
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse3);
 	glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
 
 	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 25);
-	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 1);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 2);
 
 	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0);
@@ -181,7 +181,7 @@ void CGLRenderer::Reshape(CDC* pDC, int w, int h)
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(100, (double)w / (double)h, 1, 200);
+	gluPerspective(45, (double)w / (double)h, 1, 200);
 
 	//--------------------------------
 	wglMakeCurrent(NULL, NULL);
@@ -203,13 +203,12 @@ void CGLRenderer::DrawScene(CDC* pDC)
 
 	SetLighting();
 
-
 	glEnable(GL_CULL_FACE);
 	DrawRoom(100, 100, 100, 100);
 	glDisable(GL_CULL_FACE);
 
-	DrawPedestal(10, 4);
-	DrawVase(20, 28.5 / 14, 12.175, 15, 16, this->showNormals);
+	DrawPedestal(10, 8);
+	DrawVase(22.75, 29 / 14, 17.175, 20, 16, this->showNormals);
 
 	if (this->showAxes)
 		DrawAxes(50);
@@ -255,9 +254,9 @@ void CGLRenderer::DrawPedestal(double base, int nStep)
 		DrawSphere(base / 1.1, nStep * 2, nStep * 4);
 
 		glTranslatef(0, base, 0);
-		DrawCylinder(base, base, base, nStep, false);
+		DrawCylinder(1.5 * base, base, base, nStep, false);
 
-		glTranslatef(0, 3.0 / 4.0 * base, 0);
+		glTranslatef(0, base, 0);
 		DrawCuboid(3 * base, 3 * base, base / 2, nStep);
 	}
 	glPopMatrix();
@@ -265,7 +264,7 @@ void CGLRenderer::DrawPedestal(double base, int nStep)
 
 void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, int nStep, bool showNorms)
 {
-	double dR = rBottom - rTop;
+	double dR = rBottom - rTop, tempTop;
 
 	glPushMatrix();
 	{
@@ -273,16 +272,16 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 
 		glPushMatrix();
 		{
-			this->vase->SetAmbient(.3, .3, .475, 1);
-			this->vase->SetDiffuse(.6, .6, .95, 1);
-			this->vase->SetSpecular(.6, .6, .95, 1);
+			this->vase->SetAmbient(.25, 0, 0, 1);
+			this->vase->SetDiffuse(1, 0, 0, 1);
+			this->vase->SetSpecular(.5, 0, 0, 1);
 			this->vase->Select(GL_FRONT_AND_BACK);
 
-			rTop = rBottom - dR;
+			tempTop = rTop = rBottom - 1.85 * dR;
 			glTranslatef(0, h / 2, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
-			rBottom = rTop - dR;
+			rBottom = rTop - 1.85 * dR;
 			rTop = rBottom;
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
@@ -292,17 +291,22 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
 			rBottom = rTop + dR;
+			rTop = rBottom - dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
+
+			rBottom = rTop - dR;
 			rTop = rBottom + dR;
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
-			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
-
-			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
-
+			rBottom = rTop + dR;
 			rTop = rBottom - dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
+
+			rBottom = rTop - dR;
+			rTop = rBottom + dR;
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 		}
@@ -311,13 +315,13 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 
 		glPushMatrix();
 		{
-			this->vase->SetAmbient(.225, .225, .475, 1);
-			this->vase->SetDiffuse(.45, .45, .95, 1);
-			this->vase->SetSpecular(.45, .45, .95, 1);
+			this->vase->SetAmbient(.25, .25, 0, 1);
+			this->vase->SetDiffuse(1, 1, 0, 1);
+			this->vase->SetSpecular(.5, .5, 0, 1);
 			this->vase->Select(GL_FRONT_AND_BACK);
 
-			rBottom = rTop;
-			rTop = rBottom - dR;
+			rBottom = tempTop;
+			rTop = rBottom - 1.85 * dR;
 			glTranslatef(0, 3.0 / 2.0 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
@@ -330,18 +334,19 @@ void CGLRenderer::DrawVase(double from, double h, double rTop, double rBottom, i
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 
-			rBottom += 2 * dR;
-			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
-
-			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
-
-			glTranslatef(0, 2 * h, 0);
-			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
-
 			rBottom = rTop - dR;
 			rTop = rBottom - dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
+
+			rTop = rBottom + dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
+
+			rTop = rBottom - dR;
+			glTranslatef(0, 2 * h, 0);
+			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
+
 			glTranslatef(0, 2 * h, 0);
 			DrawCylinder(h, rTop, rBottom, nStep, false, showNorms);
 		}
@@ -687,12 +692,17 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 		bMax = betaMax * M_PI / 180,
 		dAlpha = aMax / nStep1,
 		dBeta = bMax / nStep2;
-	long size = ((nStep2 + 1) * nStep2 * 3) << 2;
+
+	long size = ((nStep2 + 1) * 3) << 2;
 	float* vertNorm = new float[size];
 	int counter = 0;
 
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+
 	for (double i = 0; i < aMax; i += dAlpha)
 	{
+		counter = 0;
 		for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
 		{
 			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j);
@@ -711,14 +721,11 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 			vertNorm[counter++] = vertNorm[counter - 6];
 			vertNorm[counter++] = vertNorm[counter - 6];
 		}
+
+		glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
+		glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
+		glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
 	}
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-
-	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
-	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
-	glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
 
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -758,7 +765,7 @@ void CGLRenderer::CalculatePosition()
 		dWXZ = this->viewAngleXZ * M_PI / 180;
 
 	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
-	this->viewPosition[1] = 50 + this->viewR * sin(dWXY);
+	this->viewPosition[1] = 25 + this->viewR * sin(dWXY);
 	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
 
 	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
@@ -774,18 +781,18 @@ void CGLRenderer::SetLighting()
 
 	glEnable(GL_LIGHT0);
 
-	if (this->redLight)
+	if (this->yellowLight)
 	{
-		// Crveno poziciono svetlo
+		// Zuto poziciono svetlo
 
 		float light_spot_direction1[] = { 0, 0, -1, 1 };
 		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_spot_direction1);
 
-		float light_position_red[] = { 0, 50, 49, 1 };
-		glLightfv(GL_LIGHT1, GL_POSITION, light_position_red);
+		float light_position_yellow[] = { 0, 50, 49, 1 };
+		glLightfv(GL_LIGHT1, GL_POSITION, light_position_yellow);
 
-		this->light->SetEmission(.8, 0, 0, 0);
-		this->light->SetDiffuse(.8, 0, 0, 0);
+		this->light->SetEmission(.8, .8, 0, 0);
+		this->light->SetDiffuse(.8, .8, 0, 0);
 		this->light->Select(GL_FRONT_AND_BACK);
 
 		glEnable(GL_LIGHT1);
@@ -799,18 +806,18 @@ void CGLRenderer::SetLighting()
 	else
 		glDisable(GL_LIGHT1);
 
-	if (this->greenLight)
+	if (this->redLight)
 	{
-		// Zeleno poziciono svetlo
+		// Crveno poziciono svetlo
 
 		float light_spot_direction2[] = { 0, 0, 1, 1 };
 		glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_spot_direction2);
 
-		float light_position_green[] = { 0, 50, -49, 1 };
-		glLightfv(GL_LIGHT2, GL_POSITION, light_position_green);
+		float light_position_red[] = { 0, 50, -49, 1 };
+		glLightfv(GL_LIGHT2, GL_POSITION, light_position_red);
 
-		this->light->SetEmission(0, .8, 0, 0);
-		this->light->SetDiffuse(0, .8, 0, 0);
+		this->light->SetEmission(.8, 0, 0, 0);
+		this->light->SetDiffuse(.8, 0, 0, 0);
 		this->light->Select(GL_FRONT_AND_BACK);
 
 		glEnable(GL_LIGHT2);
@@ -825,18 +832,18 @@ void CGLRenderer::SetLighting()
 	else
 		glDisable(GL_LIGHT2);
 
-	if (this->blueLight)
+	if (this->purpleLight)
 	{
-		// Plavo poziciono svetlo
+		// Ljubicasto poziciono svetlo
 
 		float light_spot_direction3[] = { 0, -1, 0, 1 };
 		glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_spot_direction3);
 
-		float light_position_blue[] = { 0, 99, 0, 1 };
-		glLightfv(GL_LIGHT3, GL_POSITION, light_position_blue);
+		float light_position_purple[] = { 0, 99, 0, 1 };
+		glLightfv(GL_LIGHT3, GL_POSITION, light_position_purple);
 
-		this->light->SetEmission(0, 0, .8, 0);
-		this->light->SetDiffuse(0, 0, .8, 0);
+		this->light->SetEmission(.8, 0, .8, 0);
+		this->light->SetDiffuse(.8, 0, .8, 0);
 		this->light->Select(GL_FRONT_AND_BACK);
 		glEnable(GL_LIGHT3);
 
@@ -883,14 +890,14 @@ void CGLRenderer::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	case('N'):
 		this->showNormals = !this->showNormals;
 		break;
+	case('Y'):
+		this->yellowLight = !this->yellowLight;
+		break;
 	case('R'):
 		this->redLight = !this->redLight;
 		break;
-	case('G'):
-		this->greenLight = !this->greenLight;
-		break;
-	case('B'):
-		this->blueLight = !this->blueLight;
+	case('P'):
+		this->purpleLight = !this->purpleLight;
 		break;
 	default:
 		break;

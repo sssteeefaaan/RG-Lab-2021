@@ -30,9 +30,9 @@ private:
 	CGLMaterial* vase;
 	CGLMaterial* light;
 
+	bool yellowLight;
 	bool redLight;
-	bool greenLight;
-	bool blueLight;
+	bool purpleLight;
 
 	void CalculatePosition();
 public:
