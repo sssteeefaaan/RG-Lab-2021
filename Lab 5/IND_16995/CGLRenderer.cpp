@@ -96,7 +96,7 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	this->room->SetAmbient(.65, .65, .65, 1);
 	this->room->SetDiffuse(.65, .65, .65, 1);
 
-	this->pedestal->SetAmbient(.65, .65, .65, 1);
+	this->pedestal->SetAmbient(.6, .6, .6, 1);
 	this->pedestal->SetDiffuse(.7, .7, .7, 1);
 
 	this->vase->SetShininess(100);
@@ -208,7 +208,7 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	DrawRoom(100, 100, 100, 100);
 	glDisable(GL_CULL_FACE);
 
-	DrawPedestal(10, 8);
+	DrawPedestal(10, 4);
 	DrawVase(20, 28.5 / 14, 12.175, 15, 16, this->showNormals);
 
 	if (this->showAxes)
@@ -434,7 +434,7 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 	if (drawRoof ^ inverted)
 	{
 		// Gornja strana
-		glNormal3f(0, 0, 1);
+		glNormal3f(0, inverted ? -1 : 1, 0);
 		for (double i = -wHalf; i < wHalf; i += wStep)
 		{
 			glBegin(GL_QUAD_STRIP);
@@ -452,7 +452,7 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 	if (!inverted || drawRoof)
 	{
 		// Donja strana
-		glNormal3f(0, 0, -1);
+		glNormal3f(0, inverted ? 1 : -1, 0);
 		for (double i = wHalf; i > -wHalf; i -= wStep)
 		{
 			glBegin(GL_QUAD_STRIP);
@@ -620,7 +620,7 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 
 void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int betaMax)
 {
-	float aMax = alphaMax * M_PI / 180,
+	/*float aMax = alphaMax * M_PI / 180,
 		bMax = betaMax * M_PI / 180,
 		dAlpha = aMax / nStep1,
 		dBeta = bMax / nStep2;
@@ -681,7 +681,54 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 	{
 		delete[] vertNorm;
 		vertNorm = nullptr;
+	}*/
+
+	double aMax = alphaMax * M_PI / 180,
+		bMax = betaMax * M_PI / 180,
+		dAlpha = aMax / nStep1,
+		dBeta = bMax / nStep2;
+	long size = ((nStep2 + 1) * nStep2 * 3) << 2;
+	float* vertNorm = new float[size];
+	int counter = 0;
+
+	for (double i = 0; i < aMax; i += dAlpha)
+	{
+		for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
+		{
+			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j);
+			vertNorm[counter++] = r * sin(i + dAlpha);
+			vertNorm[counter++] = r * cos(i + dAlpha) * sin(j);
+
+			vertNorm[counter++] = cos(i) * cos(j);
+			vertNorm[counter++] = sin(i);
+			vertNorm[counter++] = cos(i) * sin(j);
+
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+
+			vertNorm[counter++] = vertNorm[counter - 6];
+			vertNorm[counter++] = vertNorm[counter - 6];
+			vertNorm[counter++] = vertNorm[counter - 6];
+		}
 	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+
+	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
+	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
+	glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
+
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	if (vertNorm)
+	{
+		delete[] vertNorm;
+		vertNorm = nullptr;
+	}
+
 }
 
 void CGLRenderer::DrawAxes(double len)
@@ -722,7 +769,7 @@ void CGLRenderer::SetLighting()
 	glEnable(GL_LIGHTING);
 
 	// Direkciono svetlo
-	float light_position[] = { .5, 1, .75, 0 };
+	float light_position[] = { .6, 1, .75, 0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
 	glEnable(GL_LIGHT0);
