@@ -90,40 +90,41 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 	//--------------------------------
 
-	glClearColor(0, 0, 0, 0);
+	glClearColor(0, 0, 0, 1);
 	glEnable(GL_DEPTH_TEST);
 
-	this->room->SetAmbient(.4, .4, .4, 1);
+	this->room->SetAmbient(.65, .65, .65, 1);
 	this->room->SetDiffuse(.65, .65, .65, 1);
 
-	this->pedestal->SetAmbient(.45, .45, .45, 1);
+	this->pedestal->SetAmbient(.65, .65, .65, 1);
 	this->pedestal->SetDiffuse(.7, .7, .7, 1);
 
 	this->vase->SetShininess(100);
 
-	this->light->SetAmbient(.3, .3, .3, 1);
-	this->light->SetSpecular(.5, .5, .5, 1);
+	this->light->SetAmbient(0, 0, 0, 1);
+	this->light->SetDiffuse(0, 0, 0, 1);
+	this->light->SetSpecular(0, 0, 0, 1);
 	this->light->SetShininess(112);
 
 	// Globalno ambientno svetlo
-	GLfloat l_model_ambient[] = { .25, .25, .25, 1 };
+	GLfloat l_model_ambient[] = { .3, .3, .3, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
-	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
+	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
 	// Direkciono svetlo
 	float light_ambient0[] = { .3, .3, .3, 1 };
-	float light_diffuse0[] = { .8, .8, .8, 1 };
-	float light_specular0[] = { .8, .8, .8, 1 };
+	float light_diffuse0[] = { 1, 1, 1, 1 };
+	float light_specular0[] = { .2, .2, .2, 1 };
 
 	glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse0);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular0);
 
 	// Crveno poziciono svetlo
-	float light_ambient1[] = { .5, 0, 0, 1 };
+	float light_ambient1[] = { .25, 0, 0, 1 };
 	float light_diffuse1[] = { 1, 0, 0, 1 };
-	float light_specular1[] = { 1, 0, 0, 1 };
+	float light_specular1[] = { .2, 0, 0, 1 };
 
 	glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse1);
@@ -137,32 +138,32 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0);
 
 	// Zeleno poziciono svetlo
-	float light_ambient2[] = { 0, .5, 0, 1 };
+	float light_ambient2[] = { 0, .25, 0, 1 };
 	float light_diffuse2[] = { 0, 1, 0, 1 };
-	float light_specular2[] = { 0, 1, 0, 1 };
+	float light_specular2[] = { 0, .2, 0, 1 };
 
 	glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
 	glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
 
-	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, .1);
+	glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 25);
+	glLightf(GL_LIGHT2, GL_SPOT_EXPONENT, 2);
 
 	glLightf(GL_LIGHT2, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT2, GL_LINEAR_ATTENUATION, 0);
 	glLightf(GL_LIGHT2, GL_QUADRATIC_ATTENUATION, 0);
 
 	// Plavo poziciono svetlo
-	float light_ambient3[] = { 0, 0, .5, 1 };
+	float light_ambient3[] = { 0, 0, .25, 1 };
 	float light_diffuse3[] = { 0, 0, 1, 1 };
-	float light_specular3[] = { 0, 0, 1, 1 };
+	float light_specular3[] = { 0, 0, .2, 1 };
 
 	glLightfv(GL_LIGHT3, GL_AMBIENT, light_ambient3);
 	glLightfv(GL_LIGHT3, GL_DIFFUSE, light_diffuse3);
 	glLightfv(GL_LIGHT3, GL_SPECULAR, light_specular3);
 
-	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 20);
-	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, .1);
+	glLightf(GL_LIGHT3, GL_SPOT_CUTOFF, 25);
+	glLightf(GL_LIGHT3, GL_SPOT_EXPONENT, 1);
 
 	glLightf(GL_LIGHT3, GL_CONSTANT_ATTENUATION, 1);
 	glLightf(GL_LIGHT3, GL_LINEAR_ATTENUATION, 0);
@@ -202,7 +203,11 @@ void CGLRenderer::DrawScene(CDC* pDC)
 
 	SetLighting();
 
+
+	glEnable(GL_CULL_FACE);
 	DrawRoom(100, 100, 100, 100);
+	glDisable(GL_CULL_FACE);
+
 	DrawPedestal(10, 8);
 	DrawVase(20, 28.5 / 14, 12.175, 15, 16, this->showNormals);
 
@@ -233,7 +238,7 @@ void CGLRenderer::DestroyScene(CDC* pDC)
 
 void CGLRenderer::DrawRoom(double l, double w, double h, int nStep)
 {
-	this->room->Select(GL_FRONT);
+	this->room->Select(GL_FRONT_AND_BACK);
 	glPushMatrix();
 	{
 		glTranslatef(0, h / 2, 0);
@@ -244,7 +249,7 @@ void CGLRenderer::DrawRoom(double l, double w, double h, int nStep)
 
 void CGLRenderer::DrawPedestal(double base, int nStep)
 {
-	this->pedestal->Select(GL_FRONT);
+	this->pedestal->Select(GL_FRONT_AND_BACK);
 	glPushMatrix();
 	{
 		DrawSphere(base / 1.1, nStep * 2, nStep * 4);
@@ -388,6 +393,12 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 		hStep = h / (double)nStep;
 
 	// Desna strana
+	if (inverted)
+	{
+		glPushMatrix();
+		glScalef(-1, 1, 1);
+	}
+
 	glNormal3f(inverted ? -1 : 1, 0, 0);
 	for (double i = hHalf; i > -hHalf; i -= hStep)
 	{
@@ -417,10 +428,13 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 		glEnd();
 	}
 
-	if (drawRoof)
+	if (inverted)
+		glScalef(-1, -1, 1);
+
+	if (drawRoof ^ inverted)
 	{
 		// Gornja strana
-		glNormal3f(0, inverted ? -1 : 1, 0);
+		glNormal3f(0, 0, 1);
 		for (double i = -wHalf; i < wHalf; i += wStep)
 		{
 			glBegin(GL_QUAD_STRIP);
@@ -435,22 +449,28 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 		}
 	}
 
-	// Donja strana
-	glNormal3f(0, inverted ? 1 : -1, 0);
-	for (double i = wHalf; i > -wHalf; i -= wStep)
+	if (!inverted || drawRoof)
 	{
-		glBegin(GL_QUAD_STRIP);
+		// Donja strana
+		glNormal3f(0, 0, -1);
+		for (double i = wHalf; i > -wHalf; i -= wStep)
 		{
-			for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
+			glBegin(GL_QUAD_STRIP);
 			{
-				glVertex3f(j, -hHalf, i);
-				glVertex3f(j, -hHalf, i - wStep);
+				for (double j = -lHalf; j < (lHalf + lStep); j += lStep)
+				{
+					glVertex3f(j, -hHalf, i);
+					glVertex3f(j, -hHalf, i - wStep);
+				}
 			}
+			glEnd();
 		}
-		glEnd();
 	}
 
 	// Prednja strana
+	if (inverted)
+		glScalef(1, -1, -1);
+
 	glNormal3f(0, 0, inverted ? -1 : 1);
 	for (double i = hHalf; i > -hHalf; i -= hStep)
 	{
@@ -479,6 +499,9 @@ void CGLRenderer::DrawCuboid(double l, double w, double h, int nStep, bool drawR
 		}
 		glEnd();
 	}
+
+	if (inverted)
+		glPopMatrix();
 }
 
 void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep, bool withBase, bool showNormals)
@@ -569,6 +592,7 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 	if (showNormals)
 	{
 		glDisable(GL_LIGHTING);
+		glLineWidth(1.25);
 		glColor3f(0, 1, 0);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
@@ -710,7 +734,7 @@ void CGLRenderer::SetLighting()
 		float light_spot_direction1[] = { 0, 0, -1, 1 };
 		glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, light_spot_direction1);
 
-		float light_position_red[] = { 0, 50, 48, 1 };
+		float light_position_red[] = { 0, 50, 49, 1 };
 		glLightfv(GL_LIGHT1, GL_POSITION, light_position_red);
 
 		this->light->SetEmission(.8, 0, 0, 0);
@@ -719,7 +743,11 @@ void CGLRenderer::SetLighting()
 
 		glEnable(GL_LIGHT1);
 
-		DrawLight(0, 50, 48, 2, 0, 0, -1);
+		glPushMatrix();
+		glTranslatef(0, 50, 49);
+		glRotatef(-90, 1, 0, 0);
+		DrawSphere(2, 16, 16);
+		glPopMatrix();
 	}
 	else
 		glDisable(GL_LIGHT1);
@@ -731,7 +759,7 @@ void CGLRenderer::SetLighting()
 		float light_spot_direction2[] = { 0, 0, 1, 1 };
 		glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_spot_direction2);
 
-		float light_position_green[] = { 0, 50, -48, 1 };
+		float light_position_green[] = { 0, 50, -49, 1 };
 		glLightfv(GL_LIGHT2, GL_POSITION, light_position_green);
 
 		this->light->SetEmission(0, .8, 0, 0);
@@ -740,7 +768,12 @@ void CGLRenderer::SetLighting()
 
 		glEnable(GL_LIGHT2);
 
-		DrawLight(0, 50, -48, 2, 0, 0, 1);
+		glPushMatrix();
+		glTranslatef(0, 50, -49);
+		glScalef(1, 1, -1);
+		glRotatef(-90, 1, 0, 0);
+		DrawSphere(2, 16, 16);
+		glPopMatrix();
 	}
 	else
 		glDisable(GL_LIGHT2);
@@ -752,7 +785,7 @@ void CGLRenderer::SetLighting()
 		float light_spot_direction3[] = { 0, -1, 0, 1 };
 		glLightfv(GL_LIGHT3, GL_SPOT_DIRECTION, light_spot_direction3);
 
-		float light_position_blue[] = { 0, 98, 0, 1 };
+		float light_position_blue[] = { 0, 99, 0, 1 };
 		glLightfv(GL_LIGHT3, GL_POSITION, light_position_blue);
 
 		this->light->SetEmission(0, 0, .8, 0);
@@ -760,7 +793,11 @@ void CGLRenderer::SetLighting()
 		this->light->Select(GL_FRONT_AND_BACK);
 		glEnable(GL_LIGHT3);
 
-		DrawLight(0, 98, 0, 2, 0, -1, 0);
+		glPushMatrix();
+		glTranslatef(0, 99, 0);
+		glScalef(1, -1, 1);
+		DrawSphere(2, 16, 16);
+		glPopMatrix();
 	}
 	else
 		glDisable(GL_LIGHT3);
