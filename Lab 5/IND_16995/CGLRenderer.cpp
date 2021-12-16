@@ -9,7 +9,7 @@ CGLRenderer::CGLRenderer()
 	this->viewAngleXZ = 0;
 
 	this->lookingAt[0] = 0;
-	this->lookingAt[1] = 25;
+	this->lookingAt[1] = 0;
 	this->lookingAt[2] = 0;
 
 	this->upVector[0] = 0;
@@ -637,16 +637,20 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 
-	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
-	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
+	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
+	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
 	for (double i = 0; i < aMax; i += dAlpha)
 	{
 		counter = 0;
 		for (double j = 0; j > -(bMax + dBeta); j -= dBeta)
 		{
-			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j);
-			vertNorm[counter++] = r * sin(i + dAlpha);
-			vertNorm[counter++] = r * cos(i + dAlpha) * sin(j);
+			vertNorm[counter++] = cos(i + dAlpha) * cos(j);
+			vertNorm[counter++] = sin(i + dAlpha);
+			vertNorm[counter++] = cos(i + dAlpha) * sin(j);
+
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
+			vertNorm[counter++] = r * vertNorm[counter - 3];
 
 			vertNorm[counter++] = cos(i) * cos(j);
 			vertNorm[counter++] = sin(i);
@@ -655,10 +659,6 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 			vertNorm[counter++] = r * vertNorm[counter - 3];
 			vertNorm[counter++] = r * vertNorm[counter - 3];
 			vertNorm[counter++] = r * vertNorm[counter - 3];
-
-			vertNorm[counter++] = vertNorm[counter - 6];
-			vertNorm[counter++] = vertNorm[counter - 6];
-			vertNorm[counter++] = vertNorm[counter - 6];
 		}
 		glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
 	}
@@ -700,7 +700,7 @@ void CGLRenderer::CalculatePosition()
 		dWXZ = this->viewAngleXZ * M_PI / 180;
 
 	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
-	this->viewPosition[1] = 25 + this->viewR * sin(dWXY);
+	this->viewPosition[1] = 0 + this->viewR * sin(dWXY);
 	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
 
 	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
