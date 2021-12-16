@@ -625,69 +625,6 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 
 void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int betaMax)
 {
-	/*float aMax = alphaMax * M_PI / 180,
-		bMax = betaMax * M_PI / 180,
-		dAlpha = aMax / nStep1,
-		dBeta = bMax / nStep2;
-
-	long size = (nStep1 * nStep2 * 3) << 4;
-	float* vertNorm = new float[size];
-	int counter = 0;
-
-	for (float i = 0; i < aMax; i += dAlpha)
-	{
-		for (float j = 0; j < bMax; j += dBeta)
-		{
-			vertNorm[counter++] = r * cos(i + dAlpha) * cos(j + dBeta);
-			vertNorm[counter++] = r * sin(i + dAlpha);
-			vertNorm[counter++] = r * cos(i + dAlpha) * sin(j + dBeta);
-
-			vertNorm[counter++] = cos(i) * cos(j + dBeta);
-			vertNorm[counter++] = sin(i);
-			vertNorm[counter++] = cos(i) * sin(j + dBeta);
-
-			vertNorm[counter++] = r * vertNorm[counter - 3];
-			vertNorm[counter++] = r * vertNorm[counter - 3];
-			vertNorm[counter++] = r * vertNorm[counter - 3];
-
-			vertNorm[counter++] = vertNorm[counter - 6];
-			vertNorm[counter++] = vertNorm[counter - 6];
-			vertNorm[counter++] = vertNorm[counter - 6];
-
-			vertNorm[counter++] = r * cos(i) * cos(j);
-			vertNorm[counter++] = r * sin(i);
-			vertNorm[counter++] = r * cos(i) * sin(j);
-
-			vertNorm[counter++] = cos(i + dAlpha) * cos(j);
-			vertNorm[counter++] = sin(i + dAlpha);
-			vertNorm[counter++] = cos(i + dAlpha) * sin(j);
-
-			vertNorm[counter++] = r * vertNorm[counter - 3];
-			vertNorm[counter++] = r * vertNorm[counter - 3];
-			vertNorm[counter++] = r * vertNorm[counter - 3];
-
-			vertNorm[counter++] = vertNorm[counter - 6];
-			vertNorm[counter++] = vertNorm[counter - 6];
-			vertNorm[counter++] = vertNorm[counter - 6];
-		}
-	}
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-
-	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
-	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
-	glDrawArrays(GL_QUADS, 0, counter / 6);
-
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-
-	if (vertNorm)
-	{
-		delete[] vertNorm;
-		vertNorm = nullptr;
-	}*/
-
 	double aMax = alphaMax * M_PI / 180,
 		bMax = betaMax * M_PI / 180,
 		dAlpha = aMax / nStep1,
@@ -700,6 +637,8 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 
+	glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
+	glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
 	for (double i = 0; i < aMax; i += dAlpha)
 	{
 		counter = 0;
@@ -721,9 +660,6 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 			vertNorm[counter++] = vertNorm[counter - 6];
 			vertNorm[counter++] = vertNorm[counter - 6];
 		}
-
-		glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, &vertNorm[0]);
-		glNormalPointer(GL_FLOAT, sizeof(float) * 6, &vertNorm[3]);
 		glDrawArrays(GL_QUAD_STRIP, 0, counter / 6);
 	}
 
@@ -735,7 +671,6 @@ void CGLRenderer::DrawSphere(double r, int nStep1, int nStep2, int alphaMax, int
 		delete[] vertNorm;
 		vertNorm = nullptr;
 	}
-
 }
 
 void CGLRenderer::DrawAxes(double len)
