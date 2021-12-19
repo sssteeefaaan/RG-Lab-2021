@@ -9,7 +9,7 @@ CGLRenderer::CGLRenderer()
 	this->viewAngleXZ = 0;
 
 	this->lookingAt[0] = 0;
-	this->lookingAt[1] = 0;
+	this->lookingAt[1] = 25;
 	this->lookingAt[2] = 0;
 
 	this->upVector[0] = 0;
@@ -700,7 +700,7 @@ void CGLRenderer::CalculatePosition()
 		dWXZ = this->viewAngleXZ * M_PI / 180;
 
 	this->viewPosition[0] = this->viewR * cos(dWXY) * cos(dWXZ);
-	this->viewPosition[1] = 0 + this->viewR * sin(dWXY);
+	this->viewPosition[1] = 25 + this->viewR * sin(dWXY);
 	this->viewPosition[2] = this->viewR * cos(dWXY) * sin(dWXZ);
 
 	this->upVector[1] = signbit(cos(dWXY)) ? -1 : 1;
