@@ -27,7 +27,6 @@ private:
 
 	CGLMaterial* platform;
 	CGLMaterial* truck;
-	CGLMaterial* wheels;
 
 	CGLTexture* texGrass;
 	CGLTexture* texAtlas;
@@ -43,7 +42,7 @@ public:
 	void DrawScene(CDC* pDC);
 	void DestroyScene(CDC* pDC);
 
-	void DrawAxes(double len = 50);
+	void DrawAxes(double len = 25);
 
 	void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
@@ -51,7 +50,9 @@ public:
 	void SetLighting();
 	void DrawPlatform(double width = 100, double lenght = 100, int repS = 3, int repT = 3);
 	void DrawTruck();
-	void DrawTruckBody(double a, double texA, double dS, double dT);
+	void DrawWheels();
+	void DrawCargo();
+	void DrawTruckBody(double a, double texA);
 
 	void DrawCylinder(double h, double rTop, double rBottom, int nStep, double s, double t, double rTex);
 	void DrawSphere(double r, int nStepAlpha = 16, int nStepBeta = 16, double width = 1, double height = .5);
