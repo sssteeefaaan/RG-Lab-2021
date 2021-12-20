@@ -93,8 +93,8 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	this->platform->SetAmbient(.35, .35, .35, 1);
 	this->platform->SetDiffuse(.65, .65, .65, 1);
 
-	this->truck->SetAmbient(1, 1, 1, 1);
-	this->truck->SetDiffuse(1, 1, 1, 1);
+	this->truck->SetAmbient(.7, .7, .6, 1);
+	this->truck->SetDiffuse(.7, .7, .6, 1);
 
 	CGLTexture::PrepareTexturing(true);
 	this->texAtlas->LoadFromFile((CString)"lab-6-atlas.jpg");
@@ -152,13 +152,17 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	glPushMatrix();
 	{
 		glTranslatef(0, -1.5, 0);
-		DrawPlatform(50, 50);
+
+		glEnable(GL_CULL_FACE);
+		DrawGround(50, 50);
+		glDisable(GL_CULL_FACE);
+
 		DrawTruck();
 	}
 	glPopMatrix();
 
 	if (this->showAxes)
-		DrawAxes(50);
+		DrawAxes(25);
 
 	//--------------------------------
 	glFlush();
@@ -183,7 +187,7 @@ void CGLRenderer::DestroyScene(CDC* pDC)
 	}
 }
 
-void CGLRenderer::DrawPlatform(double width, double length, int repS, int repT)
+void CGLRenderer::DrawGround(double width, double length, int repS, int repT)
 {
 	glEnable(GL_TEXTURE_2D);
 	this->platform->Select();
@@ -214,82 +218,77 @@ void CGLRenderer::DrawPlatform(double width, double length, int repS, int repT)
 void CGLRenderer::DrawTruck()
 {
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_NORMALIZE);
 
 	this->truck->Select();
 	this->texAtlas->Select();
 
 	glPushMatrix();
 	{
-		glTranslatef(0, 0, 2);
-		DrawTruckBody(1, 1.0 / 16);
+		glTranslatef(0, 0, 3);
+		DrawTruckBody(1, 1.0 / 16, 3);
 
-		glTranslatef(0, 0, -4);
-		DrawTruckBody(1, 1.0 / 16);
+		glTranslatef(0, 0, -6);
+		glScalef(1, 1, -1);
+		DrawTruckBody(1, 1.0 / 16, 3);
+	}
+	glPopMatrix();
+	
+	glPushMatrix();
+	{
+		glTranslatef(2 * 1, 2 * 3, 0);
+		DrawCargo(1, 3, 1.5, 2);
 	}
 	glPopMatrix();
 
-	DrawWheels();
-	DrawCargo();
+	glDisable(GL_LIGHTING);
+	glPushMatrix();
+	{
+		glRotatef(90, 1, 0, 0);
+		DrawWheels(1, 1.5);
 
+		glScalef(1, -1, 1);
+		DrawWheels(1, 1.5);
+	}
+	glPopMatrix();
+	glEnable(GL_LIGHTING);
+
+	glDisable(GL_NORMALIZE);
 	glDisable(GL_TEXTURE_2D);
 }
 
-void CGLRenderer::DrawWheels()
+void CGLRenderer::DrawWheels(double h, double r)
 {
 	glPushMatrix();
 	{
-		glTranslatef(0, 1.5, 0);
-		glRotatef(90, 1, 0, 0);
+		glTranslatef(2.0 * r / 3.0, 2 * h, -r);
+		DrawCylinder(h, r, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
+	}
+	glPopMatrix();
 
-		glPushMatrix();
-		{
-			glTranslatef(1, 1, 0);
-			DrawCylinder(1, 1.5, 1.5, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
-		}
-		glPopMatrix();
-
-		glPushMatrix();
-		{
-			glTranslatef(-3, 1, 0);
-			DrawCylinder(1, 1.5, 1.5, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
-		}
-		glPopMatrix();
-
-		glRotatef(-180, 1, 0, 0);
-
-		glPushMatrix();
-		{
-			glTranslatef(1, 1, 0);
-			DrawCylinder(1, 1.5, 1.5, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
-		}
-		glPopMatrix();
-
-		glPushMatrix();
-		{
-			glTranslatef(-3, 1, 0);
-			DrawCylinder(1, 1.5, 1.5, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
-		}
-		glPopMatrix();
+	glPushMatrix();
+	{
+		glTranslatef(-2.0 * r, 2 * h, -r);
+		DrawCylinder(h, r, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
 	}
 	glPopMatrix();
 }
 
-void CGLRenderer::DrawCargo()
+void CGLRenderer::DrawCargo(double r, double sx, double sy, double sz)
 {
 	glPushMatrix();
 	{
-		glTranslatef(1, 5.5, 0);
-		glScalef(2, 1.5, 2);
-		DrawSphere(1, 16, 16, 1, .5);
+		glScalef(sx, sy, sz);
+		DrawSphere(r, 16, 16, 1, .5);
 	}
 	glPopMatrix();
 }
 
-void CGLRenderer::DrawTruckBody(double a, double texA)
+void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 {
 	glPushMatrix();
 	{
-		glTranslatef(-5.5, 1.5, 0);
+		glTranslatef(-5.5 * a, 1.5 * a, 0);
 
 		glNormal3f(0, 0, 1);
 
@@ -364,7 +363,6 @@ void CGLRenderer::DrawTruckBody(double a, double texA)
 		}
 		glEnd();
 
-
 		glBegin(GL_QUADS);
 		{
 			glTexCoord2f(8 * texA, 4 * texA);
@@ -432,19 +430,164 @@ void CGLRenderer::DrawTruckBody(double a, double texA)
 			glVertex3f(11 * a, 0, 0);
 		}
 		glEnd();
+
+
+		// Bez teksture
+		glBegin(GL_QUADS);
+		{
+			// Front of the car
+			glNormal3f(-1, 0, 0);
+
+			glVertex3f(0, 0, -width);
+			glVertex3f(0, 0, 0);
+
+			glVertex3f(0, 4 * a, 0);
+			glVertex3f(0, 4 * a, -width);
+
+
+			// Wind shield
+			glNormal3f(-M_SQRT1_2, M_SQRT1_2, 0);
+
+			glVertex3f(0, 4 * a, -width);
+			glVertex3f(0, 4 * a, 0);
+
+			glVertex3f(2 * a, 6 * a, 0);
+			glVertex3f(2 * a, 6 * a, -width);
+
+			// Roof
+			glNormal3f(0, 1, 0);
+
+			glVertex3f(2 * a, 6 * a, -width);
+			glVertex3f(2 * a, 6 * a, 0);
+
+			glVertex3f(4 * a, 6 * a, 0);
+			glVertex3f(4 * a, 6 * a, -width);
+
+
+			// Back shield
+			glNormal3f(1, 0, 0);
+
+			glVertex3f(4 * a, 6 * a, -width);
+			glVertex3f(4 * a, 6 * a, 0);
+
+			glVertex3f(4 * a, 3 * a, 0);
+			glVertex3f(4 * a, 3 * a, -width);
+
+			// Propshaft
+			glNormal3f(0, 1, 0);
+			
+			glVertex3f(4 * a, 3 * a, -width);
+			glVertex3f(4 * a, 3 * a, 0);
+
+			glVertex3f(11 * a, 3 * a, 0);
+			glVertex3f(11 * a, 3 * a, -width);
+
+			// Back
+			glNormal3f(1, 0, 0);
+
+			glVertex3f(11 * a, 3 * a, -width);
+			glVertex3f(11 * a, 3 * a, 0);
+
+			glVertex3f(11 * a, 0, 0);
+			glVertex3f(11 * a, 0, -width);
+
+			// Bottom - back
+			glNormal3f(0, -1, 0);
+
+			glVertex3f(11 * a, 0, -width);
+			glVertex3f(11 * a, 0, 0);
+
+			glVertex3f(8 * a, 0, 0);
+			glVertex3f(8 * a, 0, -width);
+
+			// Bottom - back
+			glNormal3f(0, -1, 0);
+
+			glVertex3f(11 * a, 0, -width);
+			glVertex3f(11 * a, 0, 0);
+			glVertex3f(8 * a, 0, 0);
+			glVertex3f(8 * a, 0, -width);
+
+			glVertex3f(7 * a, 2 * a, -width);
+			glVertex3f(7 * a, 2 * a, 0);
+			glVertex3f(6 * a, 2 * a, 0);
+			glVertex3f(6 * a, 2 * a, -width);
+
+			glVertex3f(5 * a, 0, -width);
+			glVertex3f(5 * a, 0, 0);
+			glVertex3f(4 * a, 0, 0);
+			glVertex3f(4 * a, 0, -width);
+
+			glVertex3f(3 * a, 2 * a, -width);
+			glVertex3f(3 * a, 2 * a, 0);
+			glVertex3f(2 * a, 2 * a, 0);
+			glVertex3f(2 * a, 2 * a, -width);
+
+			glVertex3f(a, 0, -width);
+			glVertex3f(a, 0, 0);
+			glVertex3f(0, 0, 0);
+			glVertex3f(0, 0, -width);
+
+			glNormal3f(-M_SQRT1_2, -M_SQRT1_2, 0);
+
+			glVertex3f(8 * a, a, -width);
+			glVertex3f(8 * a, a, 0);
+			glVertex3f(7 * a, 2 * a, 0);
+			glVertex3f(7 * a, 2 * a, -width);
+
+			glVertex3f(4 * a, a, -width);
+			glVertex3f(4 * a, a, 0);
+			glVertex3f(3 * a, 2 * a, 0);
+			glVertex3f(3 * a, 2 * a, -width);
+
+
+			glNormal3f(M_SQRT1_2, -M_SQRT1_2, 0);
+
+			glVertex3f(6 * a, 2 * a, -width);
+			glVertex3f(6 * a, 2 * a, 0);
+			glVertex3f(5 * a, a, 0);
+			glVertex3f(5 * a, a, -width);
+
+			glVertex3f(2 * a, 2 * a, -width);
+			glVertex3f(2 * a, 2 * a, 0);
+			glVertex3f(a, a, 0);
+			glVertex3f(a, a, -width);
+
+			glNormal3f(0, -1, 0);
+
+			glVertex3f(8 * a, 0, -width);
+			glVertex3f(8 * a, 0, 0);
+			glVertex3f(8 * a, a, 0);
+			glVertex3f(8 * a, a, -width);
+
+			glVertex3f(4 * a, 0, -width);
+			glVertex3f(4 * a, 0, 0);
+			glVertex3f(4 * a, a, 0);
+			glVertex3f(4 * a, a, -width);
+
+			glNormal3f(0, 1, 0);
+
+			glVertex3f(5 * a, 0, -width);
+			glVertex3f(5 * a, 0, 0);
+			glVertex3f(5 * a, a, 0);
+			glVertex3f(5 * a, a, -width);
+
+			glVertex3f(a, 0, -width);
+			glVertex3f(a, 0, 0);
+			glVertex3f(a, a, 0);
+			glVertex3f(a, a, -width);
+		}
+		glEnd();
 	}
 	glPopMatrix();
 }
 
-void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep, double s, double t, double rTex)
+void CGLRenderer::DrawCylinder(double h, double r, int nStep, double s, double t, double rTex)
 {
 	double dW = M_PI / (double)nStep,
-		hHalf = h / 2,
-		r = rBottom - rTop,
-		L = sqrt(h * h + r * r),
-		ny = r / L,
-		nr = h / L;
+		hHalf = h / 2;
 
+	glColor3f(1, 1, 1);
 	glBegin(GL_TRIANGLE_FAN);
 	{
 		glNormal3f(0, 1, 0);
@@ -453,22 +596,7 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 		for (double i = 0; i < (2 * M_PI + dW); i += dW)
 		{
 			glTexCoord2f(rTex * sin(i) + s, rTex * cos(i) + t);
-			glVertex3f(rTop * sin(i), hHalf, rTop * cos(i));
-		}
-	}
-	glEnd();
-
-	glBegin(GL_QUAD_STRIP);
-	{
-		for (double i = 0; i < (2 * M_PI + dW); i += dW)
-		{
-			double x = sin(i),
-				y = 1,
-				z = cos(i);
-
-			glNormal3f(nr * x, ny, nr * z);
-			glVertex3f(rTop * x, hHalf, rTop * z);
-			glVertex3f(rBottom * x, -hHalf, rBottom * z);
+			glVertex3f(r * sin(i), hHalf, r * cos(i));
 		}
 	}
 	glEnd();
@@ -481,27 +609,46 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 		for (double i = 0; i < (2 * M_PI + dW); i += dW)
 		{
 			glTexCoord2f(s + rTex * sin(i), t + rTex * cos(i));
-			glVertex3f(rBottom * sin(i), -hHalf, rBottom * cos(i));
+			glVertex3f(r * sin(i), -hHalf, r * cos(i));
 		}
 	}
 	glEnd();
+
+	glDisable(GL_TEXTURE_2D);
+	glColor3f(.9, .9, .8);
+	glBegin(GL_QUAD_STRIP);
+	{
+		for (double i = 0; i < (2 * M_PI + dW); i += dW)
+		{
+			double x = sin(i),
+				y = 1,
+				z = cos(i);
+
+			glNormal3f(x, 0, z);
+			glVertex3f(r * x, hHalf, r * z);
+			glVertex3f(r * x, -hHalf, r * z);
+		}
+	}
+	glEnd();
+	glEnable(GL_TEXTURE_2D);
 }
 
-void CGLRenderer::DrawSphere(double r, int nStepAlpha, int nStepBeta, double w, double h)
+void CGLRenderer::DrawSphere(double r, int nStepAlpha, int nStepBeta, double w, double h, double offset)
 {
 	double dAlpha = M_PI / nStepAlpha,
 		dBeta = 2 * M_PI / nStepBeta,
 		dS = w / nStepBeta,
 		dT = h / nStepAlpha,
 		sj = 0,
-		ti = 1;
+		ti = 1,
+		fi = offset * M_PI / 180;
 
 	for (double i = -M_PI_2; i < M_PI_2; i += dAlpha)
 	{
 		glBegin(GL_QUAD_STRIP);
 		{
 			sj = 0;
-			for (double j = 0; j > -(2 * M_PI + dBeta); j -= dBeta)
+			for (double j = fi; j > -(fi + M_PI + dBeta); j -= dBeta)
 			{
 				double x1 = cos(i + dAlpha) * cos(j),
 					y1 = sin(i + dAlpha),
@@ -565,7 +712,7 @@ void CGLRenderer::SetLighting()
 	glEnable(GL_LIGHTING);
 
 	// Direkciono svetlo 0
-	float light_position_0[] = { 0, 1, 0, 0 };
+	float light_position_0[] = { .5, 1, 1, 0 };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position_0);
 
 	glEnable(GL_LIGHT0);
