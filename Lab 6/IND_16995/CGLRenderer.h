@@ -25,9 +25,9 @@ private:
 
 	bool showAxes;
 
-	CGLMaterial* platform;
-	CGLMaterial* truck;
-	CGLMaterial* wheels;
+	CGLMaterial* platformMat;
+	CGLMaterial* truckMat;
+	CGLMaterial* cargoMat;
 
 	CGLTexture* texGrass;
 	CGLTexture* texAtlas;

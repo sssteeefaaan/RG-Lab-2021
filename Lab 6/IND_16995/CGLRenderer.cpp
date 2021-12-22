@@ -20,8 +20,9 @@ CGLRenderer::CGLRenderer()
 
 	this->CalculatePosition();
 
-	this->truck = new CGLMaterial(),
-		this->platform = new CGLMaterial();
+	this->truckMat = new CGLMaterial(),
+		this->cargoMat = new CGLMaterial(),
+		this->platformMat = new CGLMaterial();
 
 	this->texAtlas = new CGLTexture(),
 		texGrass = new CGLTexture();
@@ -29,16 +30,22 @@ CGLRenderer::CGLRenderer()
 
 CGLRenderer::~CGLRenderer()
 {
-	if (this->truck)
+	if (this->platformMat)
 	{
-		delete this->truck;
-		this->truck = nullptr;
+		delete this->platformMat;
+		this->platformMat = nullptr;
 	}
 
-	if (this->platform)
+	if (this->truckMat)
 	{
-		delete this->platform;
-		this->platform = nullptr;
+		delete this->truckMat;
+		this->truckMat = nullptr;
+	}
+
+	if (this->cargoMat)
+	{
+		delete this->cargoMat;
+		this->cargoMat = nullptr;
 	}
 
 	if (this->texAtlas)
@@ -90,24 +97,27 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 	glClearColor(0.8, 0.8, 0.8, 1);
 	glEnable(GL_DEPTH_TEST);
 
-	this->platform->SetAmbient(.35, .35, .35, 1);
-	this->platform->SetDiffuse(.65, .65, .65, 1);
+	this->platformMat->SetAmbient(.55, .55, .55, 1);
+	this->platformMat->SetDiffuse(.85, .85, .85, 1);
 
-	this->truck->SetAmbient(.7, .7, .6, 1);
-	this->truck->SetDiffuse(.7, .7, .6, 1);
+	this->truckMat->SetAmbient(.65, .65, .45, 1);
+	this->truckMat->SetDiffuse(.65, .65, .45, 1);
+
+	this->cargoMat->SetAmbient(.85, .85, .85, 1);
+	this->cargoMat->SetDiffuse(1, 1, 1, 1);
 
 	CGLTexture::PrepareTexturing(true);
 	this->texAtlas->LoadFromFile((CString)"lab-6-atlas.jpg");
 	this->texGrass->LoadFromFile((CString)"lab-6-grass.jpg", GL_REPEAT, GL_REPEAT);
 
 	// Globalno ambientno svetlo
-	GLfloat l_model_ambient[] = { .4, .4, .4, 1 };
+	GLfloat l_model_ambient[] = { .2, .2, .2, 1 };
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, l_model_ambient);
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_FALSE);
 	glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
 
 	// Direkciono svetlo 
-	float light_ambient_directional[] = { .3, .3, .3, 1 };
+	float light_ambient_directional[] = { .35, .35, .35, 1 };
 	float light_diffuse_directional[] = { 1, 1, 1, 1 };
 	float light_specular_directional[] = { .2, .2, .2, 1 };
 
@@ -190,7 +200,7 @@ void CGLRenderer::DestroyScene(CDC* pDC)
 void CGLRenderer::DrawGround(double width, double length, int repS, int repT)
 {
 	glEnable(GL_TEXTURE_2D);
-	this->platform->Select();
+	this->platformMat->Select();
 	this->texGrass->Select();
 
 	glBegin(GL_QUADS);
@@ -220,7 +230,7 @@ void CGLRenderer::DrawTruck()
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_NORMALIZE);
 
-	this->truck->Select();
+	this->truckMat->Select();
 	this->texAtlas->Select();
 
 	glPushMatrix();
@@ -234,10 +244,12 @@ void CGLRenderer::DrawTruck()
 	}
 	glPopMatrix();
 	
+	this->cargoMat->Select();
+
 	glPushMatrix();
 	{
 		glTranslatef(2 * 1, 2 * 3, 0);
-		DrawCargo(1, 3, 1.5, 2);
+		DrawCargo(1, 3.5, 1.5, 3);
 	}
 	glPopMatrix();
 
@@ -433,6 +445,7 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 
 
 		// Bez teksture
+		glDisable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		{
 			// Front of the car
@@ -578,6 +591,7 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 			glVertex3f(a, a, -width);
 		}
 		glEnd();
+		glEnable(GL_TEXTURE_2D);
 	}
 	glPopMatrix();
 }
@@ -615,7 +629,7 @@ void CGLRenderer::DrawCylinder(double h, double r, int nStep, double s, double t
 	glEnd();
 
 	glDisable(GL_TEXTURE_2D);
-	glColor3f(.9, .9, .8);
+	glColor3f(.75, .75, .55);
 	glBegin(GL_QUAD_STRIP);
 	{
 		for (double i = 0; i < (2 * M_PI + dW); i += dW)
@@ -711,9 +725,9 @@ void CGLRenderer::SetLighting()
 {
 	glEnable(GL_LIGHTING);
 
-	// Direkciono svetlo 0
-	float light_position_0[] = { .5, 1, 1, 0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position_0);
+	// Direkciono svetlo
+	float light_position[] = { .5, 1, 1, 0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
 	glEnable(GL_LIGHT0);
 }

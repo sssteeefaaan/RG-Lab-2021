@@ -2,12 +2,12 @@
 #include "CGLMaterial.h"
 
 CGLMaterial::CGLMaterial()
+	:m_vAmbient{ .2,.2,.2,1 },
+	m_vDiffuse{ .8,.8,.8,1 },
+	m_vEmission{ 0,0,0,1 },
+	m_vSpecular{ 0,0,0,1 }
 {
 	long size = sizeof(float) * 4;
-	memset(this->m_vAmbient, .2, size);
-	memset(this->m_vDiffuse, .8, size);
-	memset(this->m_vEmission, 0, size);
-	memset(this->m_vSpecular, 1, size);
 	this->m_fShininess = 0;
 }
 
