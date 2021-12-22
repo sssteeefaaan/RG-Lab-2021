@@ -51,7 +51,7 @@ public:
 	void SetLighting();
 	void DrawGround(double width = 100, double lenght = 100, int repS = 3, int repT = 3);
 	void DrawTruck();
-	void DrawWheels(double h, double r);
+	void DrawWheels(double h, double r, double angle);
 	void DrawCargo(double r, double sx = 3, double sy = 1.5, double sz = 2);
 	void DrawTruckBody(double a, double texA, double width);
 

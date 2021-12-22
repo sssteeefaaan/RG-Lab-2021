@@ -9,7 +9,7 @@ CGLRenderer::CGLRenderer()
 	this->viewAngleXZ = 0;
 
 	this->lookingAt[0] = 0;
-	this->lookingAt[1] = 0;
+	this->lookingAt[1] = 2;
 	this->lookingAt[2] = 0;
 
 	this->upVector[0] = 0;
@@ -93,7 +93,7 @@ void CGLRenderer::PrepareScene(CDC* pDC)
 {
 	wglMakeCurrent(pDC->m_hDC, m_hrc);
 	//--------------------------------
-	
+
 	glClearColor(0.8, 0.8, 0.8, 1);
 	glEnable(GL_DEPTH_TEST);
 
@@ -163,9 +163,9 @@ void CGLRenderer::DrawScene(CDC* pDC)
 	{
 		glTranslatef(0, -1.5, 0);
 
-		glEnable(GL_CULL_FACE);
-		DrawGround(50, 50);
-		glDisable(GL_CULL_FACE);
+		//glEnable(GL_CULL_FACE);
+		DrawGround(50, 50, 2, 2);
+		//glDisable(GL_CULL_FACE);
 
 		DrawTruck();
 	}
@@ -243,13 +243,13 @@ void CGLRenderer::DrawTruck()
 		DrawTruckBody(1, 1.0 / 16, 3);
 	}
 	glPopMatrix();
-	
+
 	this->cargoMat->Select();
 
 	glPushMatrix();
 	{
-		glTranslatef(2 * 1, 2 * 3, 0);
-		DrawCargo(1, 3.5, 1.5, 3);
+		glTranslatef(2 * 1, 2 * 3.25, 0);
+		DrawCargo(1, 3.5, 2, 3);
 	}
 	glPopMatrix();
 
@@ -257,10 +257,10 @@ void CGLRenderer::DrawTruck()
 	glPushMatrix();
 	{
 		glRotatef(90, 1, 0, 0);
-		DrawWheels(1, 1.5);
+		DrawWheels(1, 1.5, -90);
 
 		glScalef(1, -1, 1);
-		DrawWheels(1, 1.5);
+		DrawWheels(1, 1.5, 90);
 	}
 	glPopMatrix();
 	glEnable(GL_LIGHTING);
@@ -269,19 +269,21 @@ void CGLRenderer::DrawTruck()
 	glDisable(GL_TEXTURE_2D);
 }
 
-void CGLRenderer::DrawWheels(double h, double r)
+void CGLRenderer::DrawWheels(double h, double r, double angle)
 {
 	glPushMatrix();
 	{
-		glTranslatef(2.0 * r / 3.0, 2 * h, -r);
-		DrawCylinder(h, r, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
+		glTranslatef(1.35 * r, 2 * h, -r);
+		glRotatef(angle, 0, 1, 0);
+		DrawCylinder(h, r, 8, 7.0 / 16, 1.5 / 16, 1.5 / 16);
 	}
 	glPopMatrix();
 
 	glPushMatrix();
 	{
-		glTranslatef(-2.0 * r, 2 * h, -r);
-		DrawCylinder(h, r, 8, 10.0 / 16, 1.5 / 16, 1.5 / 16);
+		glTranslatef(-2 * r, 2 * h, -r);
+		glRotatef(angle, 0, 1, 0);
+		DrawCylinder(h, r, 8, 7.0 / 16, 1.5 / 16, 1.5 / 16);
 	}
 	glPopMatrix();
 }
@@ -306,49 +308,102 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 
 		glBegin(GL_POLYGON);
 		{
-			glTexCoord2f(4 * texA, 3 * texA);
+			glTexCoord2f(4 * texA, 4 * texA);
 			glVertex3f(4 * a, 3 * a, 0);
 
 			glTexCoord2f(4 * texA, 0);
-			glVertex3f(4 * a, 6 * a, 0);
+			glVertex3f(4 * a, 7 * a, 0);
 
 			glTexCoord2f(2 * texA, 0);
-			glVertex3f(2 * a, 6 * a, 0);
+			glVertex3f(2 * a, 7 * a, 0);
 
 			glTexCoord2f(0, 2 * texA);
-			glVertex3f(0, 4 * a, 0);
+			glVertex3f(0, 5 * a, 0);
 
-			glTexCoord2f(0, 3 * texA);
+			glTexCoord2f(0, 4 * texA);
 			glVertex3f(0, 3 * a, 0);
 		}
 		glEnd();
 
 		glBegin(GL_QUADS);
 		{
-			glTexCoord2f(4 * texA, 4 * texA);
-			glVertex3f(4 * a, 2 * a, 0);
+			glTexCoord2f(5 * texA, 5 * texA);
+			glVertex3f(5 * a, 2 * a, 0);
 
-			glTexCoord2f(4 * texA, 3 * texA);
-			glVertex3f(4 * a, 3 * a, 0);
+			glTexCoord2f(5 * texA, 4 * texA);
+			glVertex3f(5 * a, 3 * a, 0);
 
-			glTexCoord2f(0, 3 * texA);
+			glTexCoord2f(0, 4 * texA);
 			glVertex3f(0, 3 * a, 0);
 
-			glTexCoord2f(0, 4 * texA);
+			glTexCoord2f(0, 5 * texA);
 			glVertex3f(0, 2 * a, 0);
 
 
-			glTexCoord2f(texA, 6 * texA);
+			glTexCoord2f(texA, 7 * texA);
 			glVertex3f(a, 0, 0);
 
-			glTexCoord2f(texA, 4 * texA);
-			glVertex3f(a, 2*a, 0);
+			glTexCoord2f(texA, 5 * texA);
+			glVertex3f(a, 2 * a, 0);
 
-			glTexCoord2f(0, 4 * texA);
+			glTexCoord2f(0, 5 * texA);
 			glVertex3f(0, 2 * a, 0);
 
-			glTexCoord2f(0, 6 * texA);
+			glTexCoord2f(0, 7 * texA);
 			glVertex3f(0, 0, 0);
+
+
+			glTexCoord2f(5 * texA, 7 * texA);
+			glVertex3f(5 * a, 0, 0);
+
+			glTexCoord2f( 5 * texA, 5 * texA);
+			glVertex3f(5 * a, 2 * a, 0);
+
+			glTexCoord2f(4 * texA, 5 * texA);
+			glVertex3f(4 * a, 2 * a, 0);
+
+			glTexCoord2f(4 * texA, 7 * texA);
+			glVertex3f(4 * a, 0, 0);
+
+
+			// Drugi deo
+			glTexCoord2f(11 * texA, 5 * texA);
+			glVertex3f(11 * a, 2 * a, 0);
+
+			glTexCoord2f(11 * texA, 4 * texA);
+			glVertex3f(11 * a, 3 * a, 0);
+
+			glTexCoord2f(5 * texA, 4 * texA);
+			glVertex3f(5 * a, 3 * a, 0);
+
+			glTexCoord2f(5 * texA, 5 * texA);
+			glVertex3f(5 * a, 2 * a, 0);
+
+
+			glTexCoord2f(6 * texA, 7 * texA);
+			glVertex3f(6 * a, 0, 0);
+
+			glTexCoord2f(6 * texA, 5 * texA);
+			glVertex3f(6 * a, 2 * a, 0);
+
+			glTexCoord2f(5 * texA, 5 * texA);
+			glVertex3f(5 * a, 2 * a, 0);
+
+			glTexCoord2f(5 * texA, 7 * texA);
+			glVertex3f(5 * a, 0, 0);
+
+
+			glTexCoord2f(11 * texA, 7 * texA);
+			glVertex3f(11 * a, 0, 0);
+
+			glTexCoord2f(11 * texA, 5 * texA);
+			glVertex3f(11 * a, 2 * a, 0);
+
+			glTexCoord2f(9 * texA, 5 * texA);
+			glVertex3f(9 * a, 2 * a, 0);
+
+			glTexCoord2f(9 * texA, 7 * texA);
+			glVertex3f(9 * a, 0, 0);
 		}
 		glEnd();
 
@@ -363,7 +418,6 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 			glTexCoord2f(texA, 5 * texA);
 			glVertex3f(a, a, 0);
 
-
 			glTexCoord2f(4 * texA, 5 * texA);
 			glVertex3f(4 * a, a, 0);
 
@@ -372,74 +426,26 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 
 			glTexCoord2f(3 * texA, 4 * texA);
 			glVertex3f(3 * a, 2 * a, 0);
-		}
-		glEnd();
 
-		glBegin(GL_QUADS);
-		{
-			glTexCoord2f(8 * texA, 4 * texA);
-			glVertex3f(8 * a, 2 * a, 0);
+			// Drugi deo
+			glTexCoord2f(7 * texA, 4 * texA);
+			glVertex3f(7 * a, 2 * a, 0);
 
-			glTexCoord2f(8 * texA, 3 * texA);
-			glVertex3f(8 * a, 3 * a, 0);
-
-			glTexCoord2f(4 * texA, 3 * texA);
-			glVertex3f(4 * a, 3 * a, 0);
-
-			glTexCoord2f(4 * texA, 4 * texA);
-			glVertex3f(4 * a, 2 * a, 0);
-
-
-			glTexCoord2f(5 * texA, 6 * texA);
-			glVertex3f(5 * a, 0, 0);
-
-			glTexCoord2f(5 * texA, 4 * texA);
-			glVertex3f(5 * a, 2 * a, 0);
-
-			glTexCoord2f(4 * texA, 4 * texA);
-			glVertex3f(4 * a, 2 * a, 0);
-
-			glTexCoord2f(4 * texA, 6 * texA);
-			glVertex3f(4 * a, 0, 0);
-		}
-		glEnd();
-
-		glBegin(GL_TRIANGLES);
-		{
 			glTexCoord2f(6 * texA, 4 * texA);
 			glVertex3f(6 * a, 2 * a, 0);
 
-			glTexCoord2f(5 * texA, 4 * texA);
-			glVertex3f(5 * a, 2 * a, 0);
-
-			glTexCoord2f(5 * texA, 5 * texA);
-			glVertex3f(5 * a, a, 0);
+			glTexCoord2f(6 * texA, 5 * texA);
+			glVertex3f(6 * a, a, 0);
 
 
-			glTexCoord2f(8 * texA, 5 * texA);
-			glVertex3f(8 * a, a, 0);
+			glTexCoord2f(9 * texA, 5 * texA);
+			glVertex3f(9 * a, a, 0);
+
+			glTexCoord2f(9 * texA, 4 * texA);
+			glVertex3f(9 * a, 2 * a, 0);
 
 			glTexCoord2f(8 * texA, 4 * texA);
 			glVertex3f(8 * a, 2 * a, 0);
-
-			glTexCoord2f(7 * texA, 4 * texA);
-			glVertex3f(7 * a, 2 * a, 0);
-		}
-		glEnd();
-
-		glBegin(GL_QUADS);
-		{
-			glTexCoord2f(8 * texA, 6 * texA);
-			glVertex3f(8 * a, 0, 0);
-
-			glTexCoord2f(8 * texA, 3 * texA);
-			glVertex3f(8 * a, 3 * a, 0);
-
-			glTexCoord2f(11 * texA, 3 * texA);
-			glVertex3f(11 * a, 3 * a, 0);
-
-			glTexCoord2f(11 * texA, 6 * texA);
-			glVertex3f(11 * a, 0, 0);
 		}
 		glEnd();
 
@@ -454,41 +460,41 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 			glVertex3f(0, 0, -width);
 			glVertex3f(0, 0, 0);
 
-			glVertex3f(0, 4 * a, 0);
-			glVertex3f(0, 4 * a, -width);
+			glVertex3f(0, 5 * a, 0);
+			glVertex3f(0, 5 * a, -width);
 
 
 			// Wind shield
 			glNormal3f(-M_SQRT1_2, M_SQRT1_2, 0);
 
-			glVertex3f(0, 4 * a, -width);
-			glVertex3f(0, 4 * a, 0);
+			glVertex3f(0, 5 * a, -width);
+			glVertex3f(0, 5 * a, 0);
 
-			glVertex3f(2 * a, 6 * a, 0);
-			glVertex3f(2 * a, 6 * a, -width);
+			glVertex3f(2 * a, 7 * a, 0);
+			glVertex3f(2 * a, 7 * a, -width);
 
 			// Roof
 			glNormal3f(0, 1, 0);
 
-			glVertex3f(2 * a, 6 * a, -width);
-			glVertex3f(2 * a, 6 * a, 0);
+			glVertex3f(2 * a, 7 * a, -width);
+			glVertex3f(2 * a, 7 * a, 0);
 
-			glVertex3f(4 * a, 6 * a, 0);
-			glVertex3f(4 * a, 6 * a, -width);
+			glVertex3f(4 * a, 7 * a, 0);
+			glVertex3f(4 * a, 7 * a, -width);
 
 
 			// Back shield
 			glNormal3f(1, 0, 0);
 
-			glVertex3f(4 * a, 6 * a, -width);
-			glVertex3f(4 * a, 6 * a, 0);
+			glVertex3f(4 * a, 7 * a, -width);
+			glVertex3f(4 * a, 7 * a, 0);
 
 			glVertex3f(4 * a, 3 * a, 0);
 			glVertex3f(4 * a, 3 * a, -width);
 
 			// Propshaft
 			glNormal3f(0, 1, 0);
-			
+
 			glVertex3f(4 * a, 3 * a, -width);
 			glVertex3f(4 * a, 3 * a, 0);
 
@@ -509,25 +515,16 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 
 			glVertex3f(11 * a, 0, -width);
 			glVertex3f(11 * a, 0, 0);
+			glVertex3f(9 * a, 0, 0);
+			glVertex3f(9 * a, 0, -width);
 
-			glVertex3f(8 * a, 0, 0);
-			glVertex3f(8 * a, 0, -width);
-
-			// Bottom - back
-			glNormal3f(0, -1, 0);
-
-			glVertex3f(11 * a, 0, -width);
-			glVertex3f(11 * a, 0, 0);
-			glVertex3f(8 * a, 0, 0);
-			glVertex3f(8 * a, 0, -width);
-
-			glVertex3f(7 * a, 2 * a, -width);
+			glVertex3f(8 * a, 2 * a, -width);
+			glVertex3f(8 * a, 2 * a, 0);
 			glVertex3f(7 * a, 2 * a, 0);
-			glVertex3f(6 * a, 2 * a, 0);
-			glVertex3f(6 * a, 2 * a, -width);
+			glVertex3f(7 * a, 2 * a, -width);
 
-			glVertex3f(5 * a, 0, -width);
-			glVertex3f(5 * a, 0, 0);
+			glVertex3f(6 * a, 0, -width);
+			glVertex3f(6 * a, 0, 0);
 			glVertex3f(4 * a, 0, 0);
 			glVertex3f(4 * a, 0, -width);
 
@@ -543,10 +540,10 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 
 			glNormal3f(-M_SQRT1_2, -M_SQRT1_2, 0);
 
-			glVertex3f(8 * a, a, -width);
-			glVertex3f(8 * a, a, 0);
-			glVertex3f(7 * a, 2 * a, 0);
-			glVertex3f(7 * a, 2 * a, -width);
+			glVertex3f(9 * a, a, -width);
+			glVertex3f(9 * a, a, 0);
+			glVertex3f(8 * a, 2 * a, 0);
+			glVertex3f(8 * a, 2 * a, -width);
 
 			glVertex3f(4 * a, a, -width);
 			glVertex3f(4 * a, a, 0);
@@ -556,34 +553,34 @@ void CGLRenderer::DrawTruckBody(double a, double texA, double width)
 
 			glNormal3f(M_SQRT1_2, -M_SQRT1_2, 0);
 
-			glVertex3f(6 * a, 2 * a, -width);
-			glVertex3f(6 * a, 2 * a, 0);
-			glVertex3f(5 * a, a, 0);
-			glVertex3f(5 * a, a, -width);
+			glVertex3f(7 * a, 2 * a, -width);
+			glVertex3f(7 * a, 2 * a, 0);
+			glVertex3f(6 * a, a, 0);
+			glVertex3f(6 * a, a, -width);
 
 			glVertex3f(2 * a, 2 * a, -width);
 			glVertex3f(2 * a, 2 * a, 0);
 			glVertex3f(a, a, 0);
 			glVertex3f(a, a, -width);
 
-			glNormal3f(0, -1, 0);
+			glNormal3f(-1, 0, 0);
 
-			glVertex3f(8 * a, 0, -width);
-			glVertex3f(8 * a, 0, 0);
-			glVertex3f(8 * a, a, 0);
-			glVertex3f(8 * a, a, -width);
+			glVertex3f(9 * a, 0, -width);
+			glVertex3f(9 * a, 0, 0);
+			glVertex3f(9 * a, a, 0);
+			glVertex3f(9 * a, a, -width);
 
 			glVertex3f(4 * a, 0, -width);
 			glVertex3f(4 * a, 0, 0);
 			glVertex3f(4 * a, a, 0);
 			glVertex3f(4 * a, a, -width);
 
-			glNormal3f(0, 1, 0);
+			glNormal3f(1, 0, 0);
 
-			glVertex3f(5 * a, 0, -width);
-			glVertex3f(5 * a, 0, 0);
-			glVertex3f(5 * a, a, 0);
-			glVertex3f(5 * a, a, -width);
+			glVertex3f(6 * a, 0, -width);
+			glVertex3f(6 * a, 0, 0);
+			glVertex3f(6 * a, a, 0);
+			glVertex3f(6 * a, a, -width);
 
 			glVertex3f(a, 0, -width);
 			glVertex3f(a, 0, 0);
