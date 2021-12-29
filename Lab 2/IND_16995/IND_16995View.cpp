@@ -35,7 +35,7 @@ END_MESSAGE_MAP()
 
 CIND16995View::CIND16995View() noexcept
 {
-	this->windowSize.SetSize(500, 500);
+	this->windowSize.SetSize(800, 800);
 	this->gridCount = 20;
 	this->gridSize = { int(this->windowSize.cx / this->gridCount + 0.5), int(this->windowSize.cy / this->gridCount + 0.5) };
 
