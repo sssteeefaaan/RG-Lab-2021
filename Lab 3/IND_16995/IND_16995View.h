@@ -62,7 +62,7 @@ public:
 	void Grayscale(CBitmap* bits);
 	void Bluescale(CBitmap* bitmap);
 
-	void MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName);
+	void MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName, bool grayScale);
 	CBitmap* GetBitmap(CDC* memDC, CString& fileName);
 
 protected:

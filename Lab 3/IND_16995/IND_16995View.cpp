@@ -173,7 +173,7 @@ CBitmap* CIND16995View::GetBitmap(CDC* memDC, CString& fileName)
 	return ret;
 }
 
-void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName)
+void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mask, CString& fileName, bool grayScale)
 {
 	BITMAP bm;
 	subject = GetBitmap(memDC, fileName);
@@ -194,9 +194,14 @@ void CIND16995View::MakeTransparent(CDC* memDC, CBitmap*& subject, CBitmap*& mas
 	COLORREF oldBkColorSRC = src->SetBkColor(src->GetPixel(0, 0));
 	dst->BitBlt(0, 0, picSize, picSize, src, 0, 0, SRCCOPY);
 
-	COLORREF oldTXTColorSRC = src->SetTextColor(RGB(0, 0, 0));
-	src->SetBkColor(RGB(255, 255, 255));
-	src->BitBlt(0, 0, picSize, picSize, dst, 0, 0, SRCPAINT);
+	if (grayScale)
+		this->Grayscale(src->GetCurrentBitmap());
+	else
+		this->Bluescale(src->GetCurrentBitmap());
+
+	COLORREF oldTXTColorSRC = src->SetTextColor(RGB(255, 255, 255));
+	src->SetBkColor(RGB(0, 0, 0));
+	src->BitBlt(0, 0, picSize, picSize, dst, 0, 0, SRCAND);
 
 	src->SetTextColor(oldTXTColorSRC);
 	src->SetBkColor(oldBkColorSRC);
@@ -214,7 +219,7 @@ void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 
 	CBitmap* subject = NULL,
 		* mask = NULL;
-	MakeTransparent(memDC, subject, mask, piece->file);
+	MakeTransparent(memDC, subject, mask, piece->file, !piece->blueGray);
 
 	BITMAP bmp{};
 	subject->GetBitmap(&bmp);
@@ -235,17 +240,10 @@ void CIND16995View::DrawPuzzlePiece(CDC* memDC, int i, int j)
 		Transform(memDC, piece->pos, { pos.left + pos.Width() / 2, pos.top + pos.Height() / 2 }, piece->angle, piece->mx, piece->my, false);
 
 		CBitmap* oldBM = newDC->SelectObject(mask);
-		memDC->SetBkColor(RGB(0, 0, 0));
-		memDC->SetTextColor(RGB(255, 255, 255));
-		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCPAINT);
-
-		if (piece->blueGray)
-			this->Bluescale(subject);
-		else
-			this->Grayscale(subject);
+		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCAND);
 
 		newDC->SelectObject(subject);
-		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCAND);
+		memDC->BitBlt(pos.left, pos.top, picSize, picSize, newDC, 0, 0, SRCPAINT);
 
 		newDC->SelectObject(oldBM);
 		delete newDC;
