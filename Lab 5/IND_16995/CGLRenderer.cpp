@@ -209,6 +209,8 @@ void CGLRenderer::DrawScene(CDC* pDC)
 
 	DrawPedestal(10, 8);
 	DrawVase(22.75, 29 / 14, 17.175, 20, 16, this->showNormals);
+	glTranslatef(0, 50, 0);
+	DrawTorus(16, 10, 16, 16);
 
 	if (this->showAxes)
 		DrawAxes(50);
@@ -620,6 +622,38 @@ void CGLRenderer::DrawCylinder(double h, double rTop, double rBottom, int nStep,
 	{
 		delete[] vertNorm;
 		vertNorm = nullptr;
+	}
+}
+
+void CGLRenderer::DrawTorus(double r1, double r2, int segNoAlpha, int segNoBeta)
+{
+	double r = (r1 - r2) / 2,
+		mid = r2 + r,
+		dAlpha = 2 * 3.14 / segNoAlpha,
+		dBeta = 2 * 3.14 / segNoBeta;
+
+	this->vase->Select(GL_FRONT_AND_BACK);
+	for (double i = 0; i > -(2 * 3.14 + dAlpha); i -= dAlpha)
+	{
+		double cos_i0 = cos(i),
+			sin_i0 = sin(i),
+			cos_i1 = cos(i - dAlpha),
+			sin_i1 = sin(i - dAlpha);
+
+		glBegin(GL_QUAD_STRIP);
+		for (double j = 0; j > -(2 * 3.14 + dBeta); j -= dBeta)
+		{
+			double cos_j = cos(j),
+				sin_j = sin(j);
+
+			// Iz nekog razloga su negativne vrednosti, aliiii mozda je to zbog podesavanja svetla i materijala
+			glNormal3f(-cos_i0 * cos_j, -sin_j, -sin_i0 * cos_j);
+			glVertex3f(cos_i0 * (mid + r * cos_j), r * sin_j, sin_i0 * (mid + r * cos_j));
+
+			glNormal3f(-cos_i1 * cos_j, -sin_j, -sin_i1 * cos_j);
+			glVertex3f(cos_i1 * (mid + r * cos_j), r * sin_j, sin_i1 * (mid + r * cos_j));
+		}
+		glEnd();
 	}
 }
 
